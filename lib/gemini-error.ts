@@ -15,7 +15,7 @@ export function diagnoseGeminiError(value: unknown, secrets: string[] = []) {
   else if (/API_KEY_INVALID|api key not valid|invalid api key|leaked|blocked.*key/i.test(clue)) { category = 'KEY_REJECTED'; message = 'O Google rejeitou a chave Gemini. Confira a chave e seu status no AI Studio.'; }
   else if (numeric === 429) { category = 'QUOTA'; message = 'Cota ou limite do Gemini atingido. Aguarde a renovação; não é necessário contratar um plano.'; }
   else if (numeric === 401 || numeric === 403) { category = 'ACCESS'; message = 'O Google recusou o acesso. Confira as permissões e restrições da chave/projeto.'; }
-  else if (numeric === 404) { category = 'MODEL_UNAVAILABLE'; message = 'gemini-2.5-flash não está disponível para essa chamada. Nenhum outro modelo foi chamado.'; }
+  else if (numeric === 404) { category = 'MODEL_UNAVAILABLE'; message = 'gemini-3.5-flash-lite não está disponível para essa chamada. Nenhum outro modelo foi chamado.'; }
   else if (numeric === 400) { category = 'REQUEST_REJECTED'; message = 'O Google rejeitou a configuração da chamada. O detalhe abaixo permite identificar o parâmetro.'; }
   else if (numeric === 500 || numeric === 503) { category = 'PROVIDER_UNAVAILABLE'; message = 'O serviço Gemini está indisponível ou com erro temporário.'; }
   else if (/timeout|timed out|AbortError|ETIMEDOUT/i.test(clue)) { category = 'TIMEOUT'; message = 'A chamada Gemini excedeu o tempo limite. Confira a conexão e tente novamente.'; }

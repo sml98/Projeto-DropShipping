@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GEMINI_MODEL } from '@/lib/gemini-search';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, ThinkingLevel } from '@google/genai';
 import { field, guard, readBody } from '@/lib/server/access';
 export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
         responseMimeType: 'application/json',
         responseJsonSchema: { type: 'object', required: ['title', 'painPoints', 'adCopy', 'videoScript'], properties: { title: { type: 'string' }, painPoints: { type: 'array', items: { type: 'string' } }, adCopy: { type: 'string' }, videoScript: { type: 'object', required: ['hook', 'problem', 'solution', 'callToAction'], properties: { hook: { type: 'string' }, problem: { type: 'string' }, solution: { type: 'string' }, callToAction: { type: 'string' } } } } },
         maxOutputTokens: 3000,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
         httpOptions: { timeout: 30000, retryOptions: { attempts: 1 } }
       }
     });

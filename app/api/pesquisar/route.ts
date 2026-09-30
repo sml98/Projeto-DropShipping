@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       if (!key || key === 'MY_GEMINI_API_KEY') return NextResponse.json({ error: 'Configure GEMINI_API_KEY no servidor. A pesquisa usa a mesma chave do gerador; nenhuma chave de busca adicional é necessária.' }, { status: 503 });
       try {
         const grounded = await searchGemini(query, kind, key);
-        return NextResponse.json({ ...grounded, mode, provider: 'Gemini 2.5 Flash + Google Search', model: GEMINI_MODEL, retrievedAt: new Date().toISOString(), links: buildResearchLinks(query, kind), notice: 'Fontes retornadas pelo Google Search via Gemini 2.5 Flash. Links podem redirecionar pelo Google. Confira preço, estoque e condições na fonte. Isso não certifica fornecedores nem mede vendas.' }, { headers: { 'Cache-Control': 'no-store' } });
+        return NextResponse.json({ ...grounded, mode, provider: 'Gemini 3.5 Flash-Lite + Google Search', model: GEMINI_MODEL, retrievedAt: new Date().toISOString(), links: buildResearchLinks(query, kind), notice: 'Fontes retornadas pelo Google Search via Gemini 3.5 Flash-Lite. Links podem redirecionar pelo Google. Confira preço, estoque e condições na fonte. Isso não certifica fornecedores nem mede vendas.' }, { headers: { 'Cache-Control': 'no-store' } });
       } catch (err) {
         const diagnosis = diagnoseGeminiError(err, [key, process.env.APP_ACCESS_TOKEN || '']);
         return NextResponse.json({ error: `${diagnosis.message} Nenhum resultado foi simulado.`, diagnostic: { category: diagnosis.category, providerStatus: diagnosis.providerStatus, detail: diagnosis.detail } }, { status: diagnosis.httpStatus });
