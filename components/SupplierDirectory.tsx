@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Supplier, OriginType } from '@/types';
+import { Supplier } from '@/types';
 import { 
   Search, 
   Truck, 
@@ -69,13 +69,13 @@ export function SupplierDirectory({
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-2">
               <Truck className="w-3.5 h-3.5" />
-              Diretório Híbrido Verificado
+              Diretório com fontes
             </div>
             <h2 className="text-2xl font-bold text-white tracking-tight">
               Polos Logísticos & Fornecedores de Dropshipping
             </h2>
             <p className="text-sm text-slate-400 mt-1 max-w-2xl">
-              Acesse contatos diretos de armazéns nacionais (Brás, Franca, Nova Serrana) e agentes internacionais expressos com suporte a despacho unitário e nota fiscal.
+              Empresas com site oficial e seus cadastros pessoais. Confirme contrato, despacho unitário, nota fiscal, frete e atendimento antes de contratar.
             </p>
           </div>
 
@@ -230,7 +230,7 @@ export function SupplierDirectory({
                         ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
                         : 'bg-blue-500/15 text-blue-300 border border-blue-500/30'
                     }`}>
-                      {isNational ? '🇧🇷 Nacional' : '🇨🇳 Internacional'}
+                      {isNational ? '🇧🇷 Nacional' : '🌐 Internacional'}
                     </span>
                   </div>
 
@@ -253,6 +253,7 @@ export function SupplierDirectory({
                     </div>
                   </div>
 
+                  {supplier.sourceUrl && <p className="text-xs text-emerald-300"><a href={supplier.sourceUrl} target="_blank" rel="noopener noreferrer">Fonte oficial consultada em {supplier.sourceCheckedAt}</a><br />Existência documentada; operação e entrega não auditadas.</p>}
                   {/* Description & Category */}
                   <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
                     {supplier.description}
@@ -270,7 +271,7 @@ export function SupplierDirectory({
                           <Star
                             key={i}
                             className={`w-3.5 h-3.5 ${
-                              i < Math.floor(supplier.rating)
+                              i < Math.floor(supplier.rating ?? 0)
                                 ? 'fill-amber-400 text-amber-400'
                                 : 'text-slate-700'
                             }`}
@@ -278,7 +279,7 @@ export function SupplierDirectory({
                         ))}
                       </div>
                       <span className="font-bold text-xs text-slate-200 ml-1">
-                        {supplier.rating.toFixed(1)}
+                        {supplier.rating == null ? 'Sem avaliação' : supplier.rating.toFixed(1)}
                       </span>
                       {supplier.reviewsCount && (
                         <span className="text-[11px] text-slate-500">
@@ -326,13 +327,13 @@ export function SupplierDirectory({
                     </button>
 
                     <a
-                      href={getWhatsAppUrl(supplier.whatsapp)}
+                      href={supplier.whatsapp ? getWhatsAppUrl(supplier.whatsapp) : supplier.sourceUrl || supplier.catalogUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-emerald-600/20 transition-all active:scale-95 cursor-pointer"
                     >
                       <MessageCircle className="w-4 h-4" />
-                      <span>Chamar no WhatsApp</span>
+                      <span>{supplier.whatsapp ? 'Chamar no WhatsApp' : 'Consultar fonte oficial'}</span>
                     </a>
                   </div>
 

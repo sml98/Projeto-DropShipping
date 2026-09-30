@@ -15,7 +15,6 @@ import {
   Tag, 
   ExternalLink,
   PlusCircle,
-  Truck
 } from 'lucide-react';
 
 interface ProductRadarProps {
@@ -73,13 +72,13 @@ export function ProductRadar({
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-2">
               <TrendingUp className="w-3.5 h-3.5" />
-              Tendências Híbridas Atualizadas
+              Catálogo pessoal
             </div>
             <h2 className="text-2xl font-bold text-white tracking-tight">
-              Radar de Produtos em Alta no Brasil
+              Produtos pesquisados por você
             </h2>
             <p className="text-sm text-slate-400 mt-1 max-w-2xl">
-              Produtos minerados com alta margem e demanda comprovada. Alterne entre pronta entrega no Brasil (envio em 24h) e importação exclusiva compatível com a Remessa Conforme.
+              Pesquise nas fontes acima e registre produtos com custos cotados. Este catálogo não mede demanda, vendas ou tendências.
             </p>
           </div>
 
@@ -207,7 +206,6 @@ export function ProductRadar({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.map((product) => {
             const isNational = product.origin === 'nacional';
-            const grossProfitVal = product.suggestedPrice - product.supplierCost;
 
             return (
               <div
@@ -272,6 +270,7 @@ export function ProductRadar({
                     </p>
                   </div>
 
+                  {product.sourceUrl && <a className="text-xs text-emerald-300" href={product.sourceUrl} target="_blank" rel="noopener noreferrer">Fonte do cadastro • {product.sourceCheckedAt}</a>}
                   {/* Supplier Info Link */}
                   <div className="flex items-center justify-between text-xs py-2 px-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
                     <div className="flex items-center gap-2 truncate">

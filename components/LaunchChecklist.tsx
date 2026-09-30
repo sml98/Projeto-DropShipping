@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChecklistStage, ChecklistSubtask } from '@/types';
+import { ChecklistStage } from '@/types';
 import { saveStoredChecklist, resetStoredChecklist } from '@/lib/storage';
 import { 
   CheckSquare, 
@@ -9,8 +9,6 @@ import {
   Lightbulb, 
   CheckCircle2, 
   RotateCcw, 
-  ArrowRight, 
-  Award, 
   Rocket, 
   ChevronDown, 
   ChevronUp,
@@ -86,7 +84,7 @@ export function LaunchChecklist({
     if (pct >= 80) return '🔥 Quase lá! Campanha e criativos prontos para tráfego pago!';
     if (pct >= 60) return '⚙️ Infraestrutura e loja avançadas. Hora de focar nos criativos!';
     if (pct >= 40) return '📦 Fornecedores e logística alinhados. Próximo passo: Página de Produto.';
-    if (pct >= 20) return '💡 Produto validado! Avance para o alinhamento com o fornecedor.';
+    if (pct >= 20) return '💡 Etapas iniciais concluídas. Confirme os resultados antes de avançar.';
     return '🏁 Comece pela validação de margem e saturação do produto no mercado.';
   };
 
@@ -106,7 +104,7 @@ export function LaunchChecklist({
               Checklist do Lançamento: Da Validação à Primeira Venda
             </h2>
             <p className="text-sm text-slate-400 mt-1 max-w-2xl">
-              Siga o método passo a passo validado pelas maiores operações de dropshipping no Brasil para não queimar caixa e escalar com segurança.
+              Use este roteiro de organização e valide cada hipótese com sua operação. O checklist não garante vendas nem rentabilidade.
             </p>
           </div>
 

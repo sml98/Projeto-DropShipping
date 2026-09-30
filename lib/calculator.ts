@@ -1,4 +1,4 @@
-import { CalculationInput, CalculationResult } from '@/types';
+import type { CalculationInput, CalculationResult } from '@/types';
 
 export function calculateFeasibility(input: CalculationInput): CalculationResult {
   const {
@@ -7,10 +7,17 @@ export function calculateFeasibility(input: CalculationInput): CalculationResult
     sellingPrice,
     cpa,
     isRemessaConforme,
-    gatewayFeePercent = 4.99,
-    gatewayFeeFixed = 0.40,
-    taxPercent = 4.0
+    gatewayFeePercent = 0,
+    gatewayFeeFixed = 0,
+    taxPercent = 0,
+    importTaxAmount = 0,
+    otherCosts = 0
   } = input;
+
+  for (const [name, value] of Object.entries(input)) {
+    if (typeof value === 'number' && (!Number.isFinite(value) || value < 0)) throw new RangeError(`Valor inválido: ${name}`);
+  }
+  if (gatewayFeePercent > 100 || taxPercent > 100) throw new RangeError('Taxa deve estar entre 0 e 100%.');
 
   const validCost = Math.max(0, cost || 0);
   const validFreight = Math.max(0, freight || 0);
@@ -21,28 +28,21 @@ export function calculateFeasibility(input: CalculationInput): CalculationResult
   const cifValue = validCost + validFreight;
 
   let remessaConformeImportTax = 0;
-  let remessaConformeIcms = 0;
+  const remessaConformeIcms = 0;
 
-  if (isRemessaConforme && cifValue > 0) {
-    // 20% Imposto de Importação Federal sobre CIF
-    remessaConformeImportTax = cifValue * 0.20;
-
-    // 17% ICMS Estadual sobre base aduaneira (cálculo oficial por dentro da Receita Federal/Confaz)
-    // Base ICMS = (CIF + II) / (1 - 0.17)
-    // Valor ICMS = Base ICMS * 0.17
-    const baseIcms = (cifValue + remessaConformeImportTax) / (1 - 0.17);
-    remessaConformeIcms = baseIcms * 0.17;
+  if (isRemessaConforme) {
+    remessaConformeImportTax = Math.max(0, importTaxAmount || 0);
   }
 
   const remessaConformeTotalTax = remessaConformeImportTax + remessaConformeIcms;
   const totalProductAndFreightCost = cifValue + remessaConformeTotalTax;
 
-  // Deduções do Gateway (padrão 4.99% + R$ 0,40)
+  // Taxas informadas pelo usuário
   const gatewayDeduction = validSellingPrice > 0 
     ? (validSellingPrice * (gatewayFeePercent / 100)) + gatewayFeeFixed 
     : 0;
 
-  // Imposto de Faturamento (Simples Nacional / MEI padrão 4.0%)
+  // Alíquota efetiva informada pelo usuário
   const taxDeduction = validSellingPrice > 0 
     ? validSellingPrice * (taxPercent / 100) 
     : 0;
@@ -52,23 +52,23 @@ export function calculateFeasibility(input: CalculationInput): CalculationResult
     totalProductAndFreightCost + 
     gatewayDeduction + 
     taxDeduction + 
-    validCpa;
+    validCpa + Math.max(0, otherCosts || 0);
 
-  // Lucro Líquido Real
+  // Resultado estimado por pedido
   const netProfit = validSellingPrice - totalOperatingCost;
 
-  // Margem Líquida Real
+  // Margem estimada
   const netMargin = validSellingPrice > 0 
     ? (netProfit / validSellingPrice) * 100 
     : 0;
 
   // ROAS de Equilíbrio (Break-Even ROAS)
   // Gastos sem anúncio por venda
-  const costWithoutCpa = totalProductAndFreightCost + gatewayDeduction + taxDeduction;
+  const costWithoutCpa = totalProductAndFreightCost + gatewayDeduction + taxDeduction + Math.max(0, otherCosts || 0);
   const marginBeforeAds = validSellingPrice - costWithoutCpa;
   const breakEvenRoas = marginBeforeAds > 0 
     ? validSellingPrice / marginBeforeAds 
-    : 0;
+    : null;
 
   // Veredito Inteligente
   let verdict: 'excelente' | 'moderado' | 'inviavel' = 'inviavel';
@@ -77,16 +77,16 @@ export function calculateFeasibility(input: CalculationInput): CalculationResult
 
   if (netMargin >= 25 && netProfit >= 35) {
     verdict = 'excelente';
-    verdictTitle = 'Altamente Lucrativo (Pronto para Escala)';
+    verdictTitle = 'Margem estimada elevada';
     verdictDescription = 'Margem líquida saudável acima de 25% com margem de segurança para oscilações no leilão do Facebook/TikTok Ads.';
-  } else if (netMargin >= 15) {
+  } else if (netProfit >= 0 && validSellingPrice > 0) {
     verdict = 'moderado';
-    verdictTitle = 'Margem Moderada (Monitore o Custo de Anúncios)';
-    verdictDescription = 'Operação viável, porém o CPA precisa ser controlado rigidamente para não corroer o lucro líquido.';
+    verdictTitle = 'Resultado estimado positivo (validar custos)';
+    verdictDescription = 'O resultado cobre os custos informados. Confirme custos omitidos e variações no CPA antes de investir.';
   } else {
     verdict = 'inviavel';
     verdictTitle = 'Inviável / Risco de Prejuízo';
-    verdictDescription = 'Margem inferior a 15%. Qualquer leve aumento no CPA causará prejuízo na operação. Negocie o fornecedor ou aumente o preço.';
+    verdictDescription = 'O preço não cobre os custos informados, ou falta informar o preço de venda.';
   }
 
   return {
@@ -98,6 +98,7 @@ export function calculateFeasibility(input: CalculationInput): CalculationResult
     gatewayDeduction,
     taxDeduction,
     cpaCost: validCpa,
+    otherCosts: Math.max(0, otherCosts || 0),
     totalOperatingCost,
     netProfit,
     netMargin,

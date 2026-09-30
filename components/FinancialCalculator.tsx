@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { CalculationInput, Product } from '@/types';
 import { calculateFeasibility, formatCurrencyBRL, formatPercentBR } from '@/lib/calculator';
 import { 
@@ -9,13 +9,10 @@ import {
   ShieldCheck, 
   AlertTriangle, 
   Sparkles, 
-  HelpCircle, 
   TrendingUp, 
-  Percent, 
   DollarSign, 
   Truck, 
   ShoppingBag,
-  Info,
   RefreshCcw,
   Sliders
 } from 'lucide-react';
@@ -28,16 +25,16 @@ interface FinancialCalculatorProps {
 export function FinancialCalculator({ initialProduct, onNavigateToAi }: FinancialCalculatorProps) {
   // Inputs initialized with initialProduct if provided
   const [cost, setCost] = useState<string>(
-    initialProduct ? initialProduct.supplierCost.toString() : '38.50'
+    initialProduct ? initialProduct.supplierCost.toString() : ''
   );
   const [freight, setFreight] = useState<string>(
-    initialProduct ? initialProduct.estimatedFreight.toString() : '18.00'
+    initialProduct ? initialProduct.estimatedFreight.toString() : ''
   );
   const [sellingPrice, setSellingPrice] = useState<string>(
-    initialProduct ? initialProduct.suggestedPrice.toString() : '129.90'
+    initialProduct ? initialProduct.suggestedPrice.toString() : ''
   );
   const [cpa, setCpa] = useState<string>(
-    initialProduct ? (initialProduct.suggestedPrice * 0.22).toFixed(2) : '28.00'
+    ''
   );
   const [isRemessaConforme, setIsRemessaConforme] = useState<boolean>(
     initialProduct ? initialProduct.origin === 'internacional' : false
@@ -45,13 +42,16 @@ export function FinancialCalculator({ initialProduct, onNavigateToAi }: Financia
 
   // Advanced toggles/settings
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
-  const [gatewayFeePercent, setGatewayFeePercent] = useState<string>('4.99');
-  const [gatewayFeeFixed, setGatewayFeeFixed] = useState<string>('0.40');
-  const [taxPercent, setTaxPercent] = useState<string>('4.00');
+  const [gatewayFeePercent, setGatewayFeePercent] = useState<string>('0');
+  const [gatewayFeeFixed, setGatewayFeeFixed] = useState<string>('0');
+  const [taxPercent, setTaxPercent] = useState<string>('0');
+
+  const [importTaxAmount, setImportTaxAmount] = useState('0');
+  const [otherCosts, setOtherCosts] = useState('0');
 
   // Active product name tracking
   const [activeProductName, setActiveProductName] = useState<string>(
-    initialProduct ? initialProduct.name : 'Liquidificador Portátil Turbo Fresh'
+    initialProduct ? initialProduct.name : 'Simulação pessoal'
   );
 
   // Perform calculation
@@ -60,29 +60,31 @@ export function FinancialCalculator({ initialProduct, onNavigateToAi }: Financia
     const freightNum = parseFloat(freight.replace(',', '.')) || 0;
     const priceNum = parseFloat(sellingPrice.replace(',', '.')) || 0;
     const cpaNum = parseFloat(cpa.replace(',', '.')) || 0;
-    const gatewayPct = parseFloat(gatewayFeePercent.replace(',', '.')) || 4.99;
-    const gatewayFix = parseFloat(gatewayFeeFixed.replace(',', '.')) || 0.40;
-    const taxPct = parseFloat(taxPercent.replace(',', '.')) || 4.0;
+    const gatewayPct = parseFloat(gatewayFeePercent.replace(',', '.')) || 0;
+    const gatewayFix = parseFloat(gatewayFeeFixed.replace(',', '.')) || 0;
+    const taxPct = parseFloat(taxPercent.replace(',', '.')) || 0;
 
     const input: CalculationInput = {
-      cost: costNum,
-      freight: freightNum,
-      sellingPrice: priceNum,
-      cpa: cpaNum,
+      cost: Math.max(0, costNum),
+      freight: Math.max(0, freightNum),
+      sellingPrice: Math.max(0, priceNum),
+      cpa: Math.max(0, cpaNum),
       isRemessaConforme,
-      gatewayFeePercent: gatewayPct,
-      gatewayFeeFixed: gatewayFix,
-      taxPercent: taxPct
+      gatewayFeePercent: Math.min(100, Math.max(0, gatewayPct)),
+      gatewayFeeFixed: Math.max(0, gatewayFix),
+      taxPercent: Math.min(100, Math.max(0, taxPct)),
+      importTaxAmount: Math.max(0, parseFloat(importTaxAmount.replace(',', '.')) || 0),
+      otherCosts: Math.max(0, parseFloat(otherCosts.replace(',', '.')) || 0)
     };
 
     return calculateFeasibility(input);
-  }, [cost, freight, sellingPrice, cpa, isRemessaConforme, gatewayFeePercent, gatewayFeeFixed, taxPercent]);
+  }, [cost, freight, sellingPrice, cpa, isRemessaConforme, gatewayFeePercent, gatewayFeeFixed, taxPercent, importTaxAmount, otherCosts]);
 
   const handleReset = () => {
-    setCost('38.50');
-    setFreight('18.00');
-    setSellingPrice('129.90');
-    setCpa('28.00');
+    setCost('');
+    setFreight('');
+    setSellingPrice('');
+    setCpa(''); setImportTaxAmount('0'); setOtherCosts('0'); setGatewayFeePercent('0'); setGatewayFeeFixed('0'); setTaxPercent('0');
     setIsRemessaConforme(false);
     setActiveProductName('Simulação Padrão Nacional');
   };
@@ -140,13 +142,13 @@ export function FinancialCalculator({ initialProduct, onNavigateToAi }: Financia
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold uppercase tracking-wider mb-2">
               <Calculator className="w-3.5 h-3.5" />
-              Filtro de Lucro Real & Viabilidade
+              Filtro de Resultado estimado & Viabilidade
             </div>
             <h2 className="text-2xl font-bold text-white tracking-tight">
               Calculadora Financeira para Dropshipping Híbrido
             </h2>
             <p className="text-sm text-slate-400 mt-1 max-w-2xl">
-              Simule a margem líquida real descontando taxas de gateway (4.99% + R$ 0,40), Simples Nacional (4.0%), CPA de tráfego pago e o impacto fiscal da <strong className="text-emerald-400">Remessa Conforme</strong> (20% II + 17% ICMS).
+              Simule o resultado com taxas, CPA e custos informados por você. Para importação, utilize o total de tributos de uma cotação atual.
             </p>
           </div>
 
@@ -207,16 +209,21 @@ export function FinancialCalculator({ initialProduct, onNavigateToAi }: Financia
                     Produto Internacional (Remessa Conforme)
                   </span>
                   <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                    20% II + 17% ICMS
+                    Cotação informada
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                  Aplica automaticamente o Imposto de Importação federal (20%) e o ICMS estadual (17%) sobre o valor aduaneiro (produto + frete).
+                  Informe abaixo o total de tributos da cotação atual. Nenhuma alíquota legal é presumida. Não duplique tributos já incluídos no custo.
                 </p>
               </div>
             </label>
           </div>
 
+          <div className="space-y-3 p-4 border border-slate-800 rounded-xl">
+            <p className="text-xs text-amber-300">Simulação: preencha todos os custos. Taxas zeradas são premissas suas, não isenção fiscal.</p>
+            {isRemessaConforme && <label className="block text-sm">Tributos totais de importação cotados (R$)<input type="number" min="0" step="0.01" value={importTaxAmount} onChange={e => setImportTaxAmount(e.target.value)} className="block w-full bg-slate-950 border border-slate-700 rounded p-2 mt-1" /></label>}
+            <label className="block text-sm">Outros custos por pedido (R$)<input type="number" min="0" step="0.01" value={otherCosts} onChange={e => setOtherCosts(e.target.value)} className="block w-full bg-slate-950 border border-slate-700 rounded p-2 mt-1" /><span className="text-xs text-slate-400">Rateio de assinaturas, devoluções e operação.</span></label>
+          </div>
           {/* Primary Inputs */}
           <div className="space-y-4">
             
@@ -307,7 +314,7 @@ export function FinancialCalculator({ initialProduct, onNavigateToAi }: Financia
                 />
               </div>
               <div className="flex items-center justify-between mt-1 text-[11px] text-slate-500">
-                <span>Sugestão: 20% a 25% do valor de venda</span>
+                <span>Informe seu CPA medido ou uma hipótese identificada</span>
                 <span>Break-even max: <strong>{formatCurrencyBRL(Math.max(0, result.grossRevenue - (result.totalProductAndFreightCost + result.gatewayDeduction + result.taxDeduction)))}</strong></span>
               </div>
             </div>
@@ -380,7 +387,7 @@ export function FinancialCalculator({ initialProduct, onNavigateToAi }: Financia
               {/* Big Profit Highlight */}
               <div className="text-left sm:text-right bg-slate-950/70 p-4 rounded-2xl border border-slate-800/80 min-w-[170px] backdrop-blur-md">
                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                  Lucro Líquido Real
+                  Resultado estimado
                 </span>
                 <div className={`text-2xl sm:text-3xl font-black ${
                   result.netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'
@@ -404,7 +411,7 @@ export function FinancialCalculator({ initialProduct, onNavigateToAi }: Financia
             <div className="mt-6 pt-5 border-t border-slate-800/60">
               <div className="flex items-center justify-between text-xs text-slate-300 mb-2">
                 <span>Distribuição do Preço de Venda ({formatCurrencyBRL(result.grossRevenue)})</span>
-                <span className="text-[11px] text-slate-400">ROAS de Equilíbrio: <strong>{result.breakEvenRoas > 0 ? `${result.breakEvenRoas.toFixed(2)}x` : 'N/A'}</strong></span>
+                <span className="text-[11px] text-slate-400">ROAS de Equilíbrio: <strong>{result.breakEvenRoas != null ? `${result.breakEvenRoas.toFixed(2)}x` : 'Sem equilíbrio'}</strong></span>
               </div>
 
               <div className="h-4 w-full bg-slate-950 rounded-full overflow-hidden flex border border-slate-800 p-0.5">
@@ -452,7 +459,7 @@ export function FinancialCalculator({ initialProduct, onNavigateToAi }: Financia
                 </span>
                 <span className="flex items-center gap-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                  Lucro Real ({netProfitPct.toFixed(0)}%)
+                  Resultado estimado ({netProfitPct.toFixed(0)}%)
                 </span>
               </div>
             </div>
@@ -465,17 +472,17 @@ export function FinancialCalculator({ initialProduct, onNavigateToAi }: Financia
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-blue-400" />
-                  Impacto Fiscal Discriminado (Remessa Conforme)
+                  Tributos informados na cotação
                 </h4>
                 <span className="text-[11px] text-blue-300/80 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">
-                  Desembaraço Expresso
+                  Estimativa por cotação
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                 <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wide block">
-                    Imposto Importação Federal (20%)
+                    Tributos de importação cotados
                   </span>
                   <span className="text-sm font-bold text-slate-100">
                     {formatCurrencyBRL(result.remessaConformeImportTax)}
@@ -485,12 +492,12 @@ export function FinancialCalculator({ initialProduct, onNavigateToAi }: Financia
 
                 <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
                   <span className="text-[10px] text-slate-400 uppercase tracking-wide block">
-                    ICMS Estadual (17% por dentro)
+                    ICMS separado (não discriminado)
                   </span>
                   <span className="text-sm font-bold text-slate-100">
                     {formatCurrencyBRL(result.remessaConformeIcms)}
                   </span>
-                  <span className="text-[10px] text-slate-500 block mt-0.5">Alíquota uniforme nacional</span>
+                  <span className="text-[10px] text-slate-500 block mt-0.5">Inclua no total cotado</span>
                 </div>
 
                 <div className="p-3 bg-blue-950/40 rounded-xl border border-blue-800/40">
@@ -555,6 +562,7 @@ export function FinancialCalculator({ initialProduct, onNavigateToAi }: Financia
                 <span className="text-rose-400 font-medium">-{formatCurrencyBRL(result.cpaCost)}</span>
               </div>
 
+              <div className="py-2 flex items-center justify-between text-slate-300"><span>(-) Outros custos por pedido</span><span>-{formatCurrencyBRL(result.otherCosts)}</span></div>
               {/* Custo Operacional Consolidado */}
               <div className="py-2.5 flex items-center justify-between font-medium text-slate-400 bg-slate-950/40 px-3 rounded-xl mt-1">
                 <span>(=) Custo Operacional Total Consolidado</span>
@@ -565,7 +573,7 @@ export function FinancialCalculator({ initialProduct, onNavigateToAi }: Financia
               <div className="pt-3 pb-1 flex items-center justify-between font-bold text-sm">
                 <span className="text-white flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  (=) Lucro Líquido Real no Bolso
+                  (=) Resultado estimado por pedido
                 </span>
                 <span className={`text-base ${result.netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                   {formatCurrencyBRL(result.netProfit)} ({formatPercentBR(result.netMargin)})

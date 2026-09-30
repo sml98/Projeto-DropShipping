@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'DropRadar BR | Inteligência para Dropshipping Híbrido',
-  description: 'Plataforma de inteligência de mercado, curadoria de fornecedores verificados e viabilidade financeira com cálculo Remessa Conforme para Dropshipping no Brasil.',
+  description: 'Ferramenta pessoal de pesquisa com fontes, diretório de fornecedores e simulação financeira de dropshipping.',
   openGraph: {
     title: 'DropRadar BR | Inteligência para Dropshipping Híbrido',
     description: 'Curadoria de produtos em alta, fornecedores nacionais e internacionais, calculadora com Remessa Conforme e gerador de ofertas com IA.',

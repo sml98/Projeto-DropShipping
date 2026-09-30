@@ -19,6 +19,9 @@ export interface Product {
   painPoints?: string[];
   trendingScore?: number;
   salesVolumeEstimate?: string;
+  sourceUrl?: string;
+  sourceCheckedAt?: string;
+  verificationStatus?: 'manual' | 'official-site';
   isCustom?: boolean;
 }
 
@@ -30,13 +33,16 @@ export interface Supplier {
   category: string;
   location: string; // e.g. "Brás - SP", "Franca - SP", "Shenzhen - China"
   dispatchTime: string; // e.g. "24h a 48h" ou "7 a 12 dias"
-  rating: number; // 1 to 5
+  rating?: number; // 1 to 5
   reviewsCount?: number;
   minOrder: string; // "Sem pedido mínimo (Drop unitário)"
   whatsapp: string; // phone number for wa.me
   catalogUrl?: string;
   description: string;
   verifiedBadge?: boolean;
+  sourceUrl?: string;
+  sourceCheckedAt?: string;
+  verificationStatus?: 'manual' | 'official-site';
   isCustom?: boolean;
 }
 
@@ -48,22 +54,25 @@ export interface CalculationInput {
   isRemessaConforme: boolean;
   gatewayFeePercent: number;
   gatewayFeeFixed: number;
-  taxPercent: number; // Simples Nacional / MEI
+  taxPercent: number; // User-supplied effective tax rate
+  importTaxAmount?: number; // Total import charges from an actual quote
+  otherCosts?: number;
 }
 
 export interface CalculationResult {
   grossRevenue: number;
-  remessaConformeImportTax: number; // 20%
-  remessaConformeIcms: number; // 17%
+  remessaConformeImportTax: number; // Quoted aggregate import charges (legacy field name)
+  remessaConformeIcms: number; // Not separately estimated
   remessaConformeTotalTax: number;
   totalProductAndFreightCost: number;
   gatewayDeduction: number;
   taxDeduction: number;
   cpaCost: number;
+  otherCosts: number;
   totalOperatingCost: number;
   netProfit: number;
   netMargin: number;
-  breakEvenRoas: number;
+  breakEvenRoas: number | null;
   verdict: 'excelente' | 'moderado' | 'inviavel';
   verdictTitle: string;
   verdictDescription: string;

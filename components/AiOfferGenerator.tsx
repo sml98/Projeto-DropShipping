@@ -1,19 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
+import { privateFetch } from '@/lib/client-api';
 import { OfferStructure } from '@/types';
 import { 
   Sparkles, 
   Copy, 
   Check, 
-  Send, 
-  Flame, 
   AlertCircle, 
   Video, 
-  FileText, 
   Target, 
   Loader2,
-  RefreshCw
 } from 'lucide-react';
 
 interface AiOfferGeneratorProps {
@@ -24,7 +21,7 @@ export function AiOfferGenerator({ initialProductName = '' }: AiOfferGeneratorPr
   const [productName, setProductName] = useState(initialProductName);
   const [niche, setNiche] = useState('Utilidades / Casa');
   const [targetAudience, setTargetAudience] = useState('Brasileiros buscando praticidade e custo-benefício');
-  const [keyFeature, setKeyFeature] = useState('Envio rápido, alta durabilidade e facilidade de uso');
+  const [keyFeature, setKeyFeature] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,16 +49,7 @@ export function AiOfferGenerator({ initialProductName = '' }: AiOfferGeneratorPr
     setError(null);
 
     try {
-      const res = await fetch('/api/gerar-oferta', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productName: productName.trim(),
-          niche,
-          audience: targetAudience,
-          keyFeature
-        })
-      });
+      const res = await privateFetch('/api/gerar-oferta', { productName: productName.trim(), niche, audience: targetAudience, keyFeature });
 
       const json = await res.json();
 
@@ -149,7 +137,7 @@ export function AiOfferGenerator({ initialProductName = '' }: AiOfferGeneratorPr
 
               <div>
                 <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Foco do Diferencial
+                  Foco do Características confirmadas
                 </label>
                 <input
                   type="text"

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Radar, ShieldCheck, Database, Plus, Sparkles, Building2 } from 'lucide-react';
+import { Radar, ShieldCheck, Database, Plus, Building2 } from 'lucide-react';
 
 interface HeaderProps {
   productsCount: number;
@@ -11,8 +11,6 @@ interface HeaderProps {
 }
 
 export function Header({
-  productsCount,
-  suppliersCount,
   onOpenAddProduct,
   onOpenAddSupplier
 }: HeaderProps) {
@@ -39,11 +37,11 @@ export function Header({
                   DropRadar <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">BR</span>
                 </h1>
                 <span className="px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">
-                  Híbrido v2.6
+                  Pesquisa pessoal
                 </span>
               </div>
               <p className="text-xs text-slate-400 hidden sm:block">
-                Inteligência de Mercado, Fornecedores & Viabilidade Remessa Conforme
+                Pesquisa com fontes, fornecedores e simulação de margem
               </p>
             </div>
           </div>
@@ -64,10 +62,10 @@ export function Header({
             {/* Remessa Conforme Indicator */}
             <div 
               className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-950/40 border border-blue-800/40 text-[11px] text-blue-300"
-              title="Regras fiscais oficiais: Imposto de Importação 20% + ICMS 17%"
+              title="Custos de importação devem vir de uma cotação atual"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-              <span>Remessa Conforme: <strong>20% + 17% ICMS</strong></span>
+              <span>Importação: <strong>usar cotação real</strong></span>
             </div>
 
             {/* Quick Actions */}

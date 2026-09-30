@@ -15,9 +15,8 @@ export function AddSupplierModal({ isOpen, onClose, onAddSupplier }: AddSupplier
   const [tradeName, setTradeName] = useState('');
   const [origin, setOrigin] = useState<OriginType>('nacional');
   const [category, setCategory] = useState('Utilidades Gerais');
-  const [location, setLocation] = useState('Brás - São Paulo, SP');
-  const [dispatchTime, setDispatchTime] = useState('24h a 48h');
-  const [rating, setRating] = useState('5.0');
+  const [location, setLocation] = useState('');
+  const [dispatchTime, setDispatchTime] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [catalogUrl, setCatalogUrl] = useState('');
   const [description, setDescription] = useState('');
@@ -26,11 +25,11 @@ export function AddSupplierModal({ isOpen, onClose, onAddSupplier }: AddSupplier
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !whatsapp) return;
+    if (!name.trim() || !catalogUrl.trim()) return;
 
     // Remove caracteres não numéricos do telefone
     const cleanPhone = whatsapp.replace(/\D/g, '');
-    const formattedPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+    const formattedPhone = cleanPhone ? (origin === 'nacional' && !cleanPhone.startsWith('55') ? `55${cleanPhone}` : cleanPhone) : '';
 
     const newSupplier: Supplier = {
       id: `custom-sup-${Date.now()}`,
@@ -39,17 +38,20 @@ export function AddSupplierModal({ isOpen, onClose, onAddSupplier }: AddSupplier
       origin,
       category,
       location: location.trim(),
-      dispatchTime,
-      rating: parseFloat(rating) || 5.0,
-      reviewsCount: 1,
-      minOrder: 'Sem pedido mínimo (Drop Unitário)',
+      dispatchTime: dispatchTime.trim() || 'Não informado',
+
+      minOrder: 'Condições a confirmar',
       whatsapp: formattedPhone,
       catalogUrl: catalogUrl.trim() || undefined,
-      description: description.trim() || 'Fornecedor parceiro cadastrado com suporte a despacho individual para dropshipping.',
-      verifiedBadge: true,
+      description: description.trim() || 'Cadastro manual. Condições de dropshipping a confirmar.',
+      sourceUrl: catalogUrl.trim(),
+      sourceCheckedAt: new Date().toISOString(),
+      verifiedBadge: false,
+      verificationStatus: 'manual',
       isCustom: true
     };
 
+    if (catalogUrl && !/^https:\/\//i.test(catalogUrl)) return;
     onAddSupplier(newSupplier);
     onClose();
   };
@@ -66,7 +68,7 @@ export function AddSupplierModal({ isOpen, onClose, onAddSupplier }: AddSupplier
             </div>
             <div>
               <h3 className="font-semibold text-lg text-white">Cadastrar Novo Fornecedor</h3>
-              <p className="text-xs text-slate-400">Armazenamento local seguro no seu navegador (offline-ready)</p>
+              <p className="text-xs text-slate-400">Cadastro pessoal no navegador; faça backup regularmente</p>
             </div>
           </div>
           <button 
@@ -182,10 +184,9 @@ export function AddSupplierModal({ isOpen, onClose, onAddSupplier }: AddSupplier
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">WhatsApp Comercial (com DDD) *</label>
+              <label className="block text-xs font-medium text-slate-300 mb-1">WhatsApp comercial confirmado (opcional)</label>
               <input
                 type="text"
-                required
                 placeholder="Ex: 11999998888 ou 5511999998888"
                 value={whatsapp}
                 onChange={(e) => setWhatsapp(e.target.value)}
@@ -194,9 +195,11 @@ export function AddSupplierModal({ isOpen, onClose, onAddSupplier }: AddSupplier
               <span className="text-[10px] text-slate-400 mt-1 block">O link usará a mensagem padrão de abordagem de dropshipping</span>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Link do Catálogo / Drive / Site</label>
+              <label className="block text-xs font-medium text-slate-300 mb-1">Site oficial / catálogo (obrigatório)</label>
               <input
                 type="url"
+                required
+                pattern="https://.*"
                 placeholder="https://drive.google.com/... ou site"
                 value={catalogUrl}
                 onChange={(e) => setCatalogUrl(e.target.value)}
@@ -205,25 +208,6 @@ export function AddSupplierModal({ isOpen, onClose, onAddSupplier }: AddSupplier
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Avaliação Inicial</label>
-            <div className="flex items-center gap-3">
-              {['4.5', '4.7', '4.8', '4.9', '5.0'].map((rate) => (
-                <button
-                  key={rate}
-                  type="button"
-                  onClick={() => setRating(rate)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                    rating === rate
-                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                      : 'bg-slate-950 text-slate-400 border-slate-800'
-                  }`}
-                >
-                  ⭐ {rate}
-                </button>
-              ))}
-            </div>
-          </div>
 
           <div>
             <label className="block text-xs font-medium text-slate-300 mb-1">Observações / Detalhes de Despacho</label>

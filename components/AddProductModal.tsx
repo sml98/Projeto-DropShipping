@@ -13,14 +13,15 @@ interface AddProductModalProps {
 export function AddProductModal({ isOpen, onClose, onAddProduct }: AddProductModalProps) {
   const [name, setName] = useState('');
   const [category, setCategory] = useState('Utilidades');
-  const [niche, setNiche] = useState('Casa & Dia a Dia');
+  const [niche] = useState('Casa & Dia a Dia');
   const [origin, setOrigin] = useState<OriginType>('nacional');
   const [supplierCost, setSupplierCost] = useState('');
   const [suggestedPrice, setSuggestedPrice] = useState('');
-  const [estimatedFreight, setEstimatedFreight] = useState('18.00');
+  const [estimatedFreight, setEstimatedFreight] = useState('');
   const [supplierName, setSupplierName] = useState('');
-  const [supplierLocation, setSupplierLocation] = useState('São Paulo - SP');
+  const [supplierLocation, setSupplierLocation] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [sourceUrl, setSourceUrl] = useState('');
   const [description, setDescription] = useState('');
 
   if (!isOpen) return null;
@@ -35,9 +36,7 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: AddProductMod
 
     const grossMargin = priceNum > 0 ? ((priceNum - costNum) / priceNum) * 100 : 0;
 
-    const defaultImage = origin === 'nacional'
-      ? 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80'
-      : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80';
+    const defaultImage = '/product-placeholder.svg';
 
     const newProd: Product = {
       id: `custom-prod-${Date.now()}`,
@@ -45,8 +44,8 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: AddProductMod
       category,
       niche,
       origin,
-      originBadge: origin === 'nacional' ? 'Estoque Brasil (3 a 6 dias)' : 'Importação Exclusiva (10 a 15 dias)',
-      deliveryTime: origin === 'nacional' ? '2 a 5 dias úteis' : '10 a 15 dias úteis',
+      originBadge: origin === 'nacional' ? 'Origem nacional informada' : 'Origem internacional informada',
+      deliveryTime: 'Não informado',
       imageUrl: imageUrl.trim() || defaultImage,
       supplierCost: costNum,
       suggestedPrice: priceNum,
@@ -54,17 +53,17 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: AddProductMod
       grossMargin: parseFloat(grossMargin.toFixed(1)),
       supplierName: supplierName.trim() || 'Fornecedor Parceiro Cadastrado',
       supplierLocation: supplierLocation.trim() || (origin === 'nacional' ? 'Brasil' : 'China'),
-      description: description.trim() || 'Produto com alta margem e demanda validada para dropshipping.',
-      painPoints: [
-        'Problema recorrente que gera busca imediata no Google e redes',
-        'Custo elevado de marcas tradicionais similares',
-        'Necessidade de entrega confiável com código de rastreamento'
-      ],
-      trendingScore: 90,
-      salesVolumeEstimate: '+1.500 vendas/mês',
+      description: description.trim() || 'Produto cadastrado manualmente. Demanda não medida.',
+      painPoints: [],
+      sourceUrl: sourceUrl.trim(),
+      sourceCheckedAt: new Date().toISOString(),
+      verificationStatus: 'manual',
       isCustom: true
     };
 
+    if (!/^https:\/\//i.test(sourceUrl.trim())) return;
+    if (![costNum, priceNum, freightNum].every(n => Number.isFinite(n) && n >= 0)) return;
+    if (imageUrl && !/^https:\/\//i.test(imageUrl)) return;
     onAddProduct(newProd);
     onClose();
   };
@@ -228,13 +227,14 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: AddProductMod
             <label className="block text-xs font-medium text-slate-300 mb-1">Descrição Curta / Diferencial</label>
             <textarea
               rows={2}
-              placeholder="Ex: Produto viral no TikTok com alta procura e boa aceitação de pagamento via PIX."
+              placeholder="Descreva somente características confirmadas na fonte."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 resize-none"
             />
           </div>
 
+          <label className="block text-xs text-slate-300">URL da fonte / cotação (obrigatória)<input type="url" required pattern="https://.*" value={sourceUrl} onChange={e => setSourceUrl(e.target.value)} placeholder="https://site-do-fornecedor/produto" className="block w-full p-2 mt-1 bg-slate-950 border border-slate-700 rounded-lg" /></label>
           {/* Modal Footer */}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
             <button

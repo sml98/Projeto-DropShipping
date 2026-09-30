@@ -35,9 +35,10 @@ export function ExportModal({ product, isOpen, onClose }: ExportModalProps) {
     painPoints: product.painPoints || [],
     marketingAngles: [
       `Foco em resolver: ${product.painPoints?.[0] || 'Praticidade no dia a dia'}`,
-      'Garantia de 7 dias e envio com código de rastreamento',
-      'Desconto exclusivo no pagamento via PIX'
+      'Confirmar condições comerciais antes de publicar'
     ],
+    sourceUrl: product.sourceUrl,
+    verificationStatus: product.verificationStatus,
     exportedAt: new Date().toISOString(),
     sourcePlatform: 'DropRadar BR'
   };
@@ -51,11 +52,11 @@ export function ExportModal({ product, isOpen, onClose }: ExportModalProps) {
     product.suggestedPrice.toFixed(2),
     product.supplierCost.toFixed(2),
     product.estimatedFreight.toFixed(2),
-    `"${product.category}"`,
-    `"${product.niche}"`,
+    `"${product.category.replace(/"/g, '""')}"`,
+    `"${product.niche.replace(/"/g, '""')}"`,
     `"${product.origin === 'nacional' ? 'Estoque Nacional' : 'Internacional (Remessa Conforme)'}"`,
     `"${product.deliveryTime}"`,
-    `"${product.supplierName}"`,
+    `"${product.supplierName.replace(/"/g, '""')}"`,
     `"${product.description.replace(/"/g, '""')}"`
   ];
   const csvString = `${csvHeaders.join(';')}\n${csvValues.join(';')}`;
@@ -97,7 +98,7 @@ export function ExportModal({ product, isOpen, onClose }: ExportModalProps) {
             </div>
             <div>
               <h3 className="font-semibold text-lg text-white">Exportar Produto para Loja</h3>
-              <p className="text-xs text-slate-400">Gere um arquivo estruturado para cadastrar na sua plataforma (Shopify, Nuvemshop, Yampi)</p>
+              <p className="text-xs text-slate-400">Backup genérico; adapte as colunas ao importador da sua loja</p>
             </div>
           </div>
           <button 

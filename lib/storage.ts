@@ -1,9 +1,10 @@
+import { isProduct, isSupplier, isChecklist } from './backup';
 import { Product, Supplier, ChecklistStage } from '@/types';
-import { INITIAL_PRODUCTS, INITIAL_SUPPLIERS, INITIAL_CHECKLIST_STAGES } from './data/mockData';
+import { INITIAL_PRODUCTS, INITIAL_SUPPLIERS, INITIAL_CHECKLIST_STAGES } from './data/seedData';
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'dropradar_products_v1',
-  SUPPLIERS: 'dropradar_suppliers_v1',
+  PRODUCTS: 'dropradar_products_v2',
+  SUPPLIERS: 'dropradar_suppliers_v2',
   CHECKLIST: 'dropradar_checklist_v1',
   CALCULATOR_INPUT: 'dropradar_calc_state_v1',
 };
@@ -14,11 +15,14 @@ export function getStoredProducts(): Product[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
     if (!raw) {
-      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
-      return INITIAL_PRODUCTS;
+      const legacy = JSON.parse(localStorage.getItem('dropradar_products_v1') || '[]');
+      const migrated = Array.isArray(legacy) ? legacy.filter(p => p?.isCustom && typeof p.name === 'string').map(p => ({ ...p, trendingScore: undefined, salesVolumeEstimate: undefined, painPoints: [], description: 'Cadastro manual migrado. Confira custos, prazo e características.', verificationStatus: 'manual' })) : [];
+      const valid = migrated.filter(isProduct);
+      saveStoredProducts(valid);
+      return valid;
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_PRODUCTS;
+    return Array.isArray(parsed) ? parsed.filter(isProduct) : INITIAL_PRODUCTS;
   } catch (e) {
     console.warn('Erro ao carregar produtos do localStorage:', e);
     return INITIAL_PRODUCTS;
@@ -47,11 +51,14 @@ export function getStoredSuppliers(): Supplier[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.SUPPLIERS);
     if (!raw) {
-      localStorage.setItem(STORAGE_KEYS.SUPPLIERS, JSON.stringify(INITIAL_SUPPLIERS));
-      return INITIAL_SUPPLIERS;
+      const legacy = JSON.parse(localStorage.getItem('dropradar_suppliers_v1') || '[]');
+      const manual = Array.isArray(legacy) ? legacy.filter(s => s?.isCustom && typeof s.name === 'string').map(s => ({ ...s, verifiedBadge: false, rating: undefined, reviewsCount: undefined, verificationStatus: 'manual' })) : [];
+      const migrated = [...manual.filter(isSupplier), ...INITIAL_SUPPLIERS];
+      saveStoredSuppliers(migrated);
+      return migrated;
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_SUPPLIERS;
+    return Array.isArray(parsed) ? parsed.filter(isSupplier) : INITIAL_SUPPLIERS;
   } catch (e) {
     console.warn('Erro ao carregar fornecedores do localStorage:', e);
     return INITIAL_SUPPLIERS;
@@ -84,7 +91,7 @@ export function getStoredChecklist(): ChecklistStage[] {
       return INITIAL_CHECKLIST_STAGES;
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_CHECKLIST_STAGES;
+    return Array.isArray(parsed) && parsed.every(isChecklist) ? parsed : INITIAL_CHECKLIST_STAGES;
   } catch (e) {
     console.warn('Erro ao carregar checklist do localStorage:', e);
     return INITIAL_CHECKLIST_STAGES;
@@ -105,7 +112,7 @@ export function resetStoredChecklist(): ChecklistStage[] {
   try {
     localStorage.setItem(STORAGE_KEYS.CHECKLIST, JSON.stringify(INITIAL_CHECKLIST_STAGES));
     return INITIAL_CHECKLIST_STAGES;
-  } catch (e) {
+  } catch {
     return INITIAL_CHECKLIST_STAGES;
   }
 }

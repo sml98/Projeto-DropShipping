@@ -19,13 +19,21 @@ import { LaunchChecklist } from '@/components/LaunchChecklist';
 import { ExportModal } from '@/components/ExportModal';
 import { AddProductModal } from '@/components/AddProductModal';
 import { AddSupplierModal } from '@/components/AddSupplierModal';
-import { ShieldCheck, Database, Sparkles, ExternalLink } from 'lucide-react';
+import { ResearchPanel } from '@/components/ResearchPanel';
+import { INITIAL_PRODUCTS, INITIAL_SUPPLIERS, INITIAL_CHECKLIST_STAGES } from '@/lib/data/seedData';
+import { ShieldCheck, Database } from 'lucide-react';
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('radar');
-  const [products, setProducts] = useState<Product[]>(() => getStoredProducts());
-  const [suppliers, setSuppliers] = useState<Supplier[]>(() => getStoredSuppliers());
-  const [checklistStages, setChecklistStages] = useState<ChecklistStage[]>(() => getStoredChecklist());
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [suppliers, setSuppliers] = useState<Supplier[]>(INITIAL_SUPPLIERS);
+  const [checklistStages, setChecklistStages] = useState<ChecklistStage[]>(INITIAL_CHECKLIST_STAGES);
+
+  useEffect(() => {
+    setProducts(getStoredProducts());
+    setSuppliers(getStoredSuppliers());
+    setChecklistStages(getStoredChecklist());
+  }, []);
 
   // Modals state
   const [exportProduct, setExportProduct] = useState<Product | null>(null);
@@ -104,6 +112,8 @@ export default function HomePage() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
+        <ResearchPanel />
+
         {/* Module 1: Radar em Alta */}
         {activeTab === 'radar' && (
           <ProductRadar
@@ -195,7 +205,7 @@ export default function HomePage() {
             <span>•</span>
             <span className="flex items-center gap-1.5 text-blue-400">
               <ShieldCheck className="w-3.5 h-3.5" />
-              Remessa Conforme Homologada
+              Fontes rastreáveis; cotações a confirmar
             </span>
           </div>
         </div>
