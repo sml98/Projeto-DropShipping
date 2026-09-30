@@ -4,7 +4,8 @@ Ferramenta para pesquisar produtos e fornecedores, registrar cotações e simula
 
 ## O que é real e o que é uma hipótese
 
-- **Pesquisa gratuita:** busca automática opcional pela Tavily (cota gratuita), retornando títulos, URLs e trechos efetivamente recebidos, com data da consulta. Não solicita respostas geradas por IA. Sem configuração, prepara links de pesquisa no Google, DuckDuckGo e Mercado Livre sem chave ou assinatura de API. Os resultados são consultados no próprio site. A busca automática exibe resultados da fonte; não extrai preços, estoque ou avaliações como dados comerciais confirmados. Registre manualmente os dados confirmados e a URL de origem.
+- **Busca web:** utiliza exclusivamente `gemini-2.5-flash` com a ferramenta Google Search, usando a mesma `GEMINI_API_KEY` do gerador. Exibe somente os títulos e URLs de `groundingMetadata.groundingChunks`, junto com a data da consulta. Exige também consultas em `webSearchQueries` para aceitar uma pesquisa. O texto gerado pelo modelo não vira catálogo, preço ou avaliação. Sem pesquisa com fontes válidas, retorna erro. Os links podem redirecionar pelo Google. Confirme preço, estoque, frete e contrato na página original.
+- **Pesquisa direta:** prepara links para Google, DuckDuckGo e Mercado Livre sem chamar APIs, exigir chave ou token. Continua disponível quando a busca automática falha.
 - **Fornecedores iniciais:** Printful e CJdropshipping, com links dos próprios sites consultados em 30/09/2026. Isso documenta a existência e a oferta anunciada, não uma auditoria de qualidade, contrato, disponibilidade no Brasil ou certificação. Não há WhatsApps, notas ou avaliações presumidas.
 - **Produtos:** catálogo inicialmente vazio. Cadastre um produto após pesquisa e cotação, informando sua URL de origem. Custo, frete, preço de venda e CPA são valores informados pelo usuário; não são métricas obtidas automaticamente de marketplaces.
 - **Calculadora:** não presume alíquotas legais, regime tributário ou adesão ao Remessa Conforme. Informe o total de tributos da cotação atual e evite duplicar impostos já incluídos no custo. As taxas inicialmente zeradas não significam isenção. Inclua custos de operação e devoluções no campo de outros custos por pedido.
@@ -19,36 +20,34 @@ npm ci
 cp .env.example .env.local
 ```
 
-Configure `.env.local`:
+Configure `.env.local` apenas na primeira instalação:
 
 ```dotenv
-APP_ACCESS_TOKEN=
-# Token para as APIs opcionais Tavily e Gemini; pesquisa direta não exige token.
-TAVILY_API_KEY=sua_chave_tavily_opcional
-GEMINI_API_KEY=sua_chave_gemini_opcional
-GEMINI_MODEL=gemini-3.8-flash
+APP_ACCESS_TOKEN=seu_token_pessoal_com_pelo_menos_24_caracteres
+GEMINI_API_KEY=sua_chave_gemini
 ```
 
-A Brave foi removida. A pesquisa direta não precisa de chave ou assinatura. A Tavily é opcional e exige uma chave do plano gratuito. A busca por feed público foi descartada porque os testes retornaram listas vazias ou resultados sem relação com o termo pesquisado. O aplicativo não apresenta esse conteúdo como pesquisa válida.
+A chave já configurada em `GEMINI_API_KEY` é reutilizada. Não é necessário cadastrar outra API nem trocar a chave. Brave e Tavily não são chamadas. As variáveis antigas `BRAVE_SEARCH_API_KEY`, `TAVILY_API_KEY` e `GEMINI_MODEL` são ignoradas; busca e gerador chamam somente `gemini-2.5-flash`. A seleção fixa impede que uma configuração antiga direcione chamadas a outro modelo.
 
-Para testar pesquisa, catálogo e calculadora, não configure nenhuma credencial. Para usar o gerador opcional de anúncios, configure `APP_ACCESS_TOKEN` com pelo menos 24 caracteres (gere com `openssl rand -hex 32`) e `GEMINI_API_KEY`, obtida em https://aistudio.google.com/ . A IA é opcional e o custo/quota depende da sua conta. Nenhuma chave é incluída no repositório ou enviada ao navegador.
+O token protege o consumo da sua chave e fica no sessionStorage da aba. Se ainda não houver token, gere com `openssl rand -hex 32` e configure `APP_ACCESS_TOKEN` no servidor. Não publique `.env.local` nem envie a chave no chat. A chave fica somente no servidor.
 
 ```bash
 npm run dev
 ```
 
-Abra http://localhost:3000, digite um produto ou fornecedor e clique em **Preparar pesquisa gratuita**. Escolha um dos sites para consultar resultados reais. Confira a página do vendedor, custo, frete e disponibilidade; depois use **+ Produto** ou **+ Fornecedor** para salvar a cotação e seu link. A pesquisa não exige token, mesmo quando o token do gerador está configurado.
+Abra http://localhost:3000. Em **Acesso às APIs opcionais**, informe apenas o token pessoal, não a chave Gemini. A opção **Buscar com Gemini 2.5 Flash + Google Search** vem ativada. Digite o produto ou fornecedor e clique em **Buscar com Gemini**. As fontes e a data aparecerão após a consulta. O widget de sugestões de pesquisa fornecido pelo Google é exibido em um iframe isolado sem execução de scripts e sem acesso ao armazenamento do app.
 
-Uma eventual `BRAVE_SEARCH_API_KEY` antiga em `.env.local` não é utilizada e pode ser removida. Preserve as outras configurações. Catálogo, calculadora, checklist e backups continuam funcionando sem APIs. A busca automática está implementada com Tavily; obter catálogos, cotações e estoques por APIs dos fornecedores permanece pendente.
+Confira os dados comerciais na página original antes de registrar uma cotação em **+ Produto** ou **+ Fornecedor**. O app não mede vendas ou demanda nem confirma que um fornecedor é confiável. Obter catálogos, estoques e cotações oficiais por APIs dos fornecedores continua pendente.
 
-### Ativar a busca automática gratuita (Tavily)
+Para usar o app sem credenciais, desmarque a busca Gemini e escolha **Preparar pesquisa gratuita**. Catálogo, calculadora, checklist e backups continuam disponíveis.
 
-1. Cadastre-se em https://app.tavily.com/ e escolha **Researcher / Free**, sem cartão e sem ativar Pay As You Go. A página oficial informa 1.000 créditos por mês. Busca básica custa 1 crédito; outras operações da sua conta também consomem o saldo.
-2. No Termux, pare o servidor e edite `.env.local` com `nano .env.local`. Adicione `TAVILY_API_KEY` e um `APP_ACCESS_TOKEN` pessoal de pelo menos 24 caracteres. Gere o token com `openssl rand -hex 32`. Preserve as outras variáveis. Não publique esse arquivo nem envie suas chaves no chat.
-3. Reinicie `npm run dev:termux`. No app, abra **Acesso às APIs opcionais**, informe apenas o token pessoal e marque **Busca automática com Tavily**.
-4. Consulte um produto ou fornecedor. O app mostra os resultados e suas fontes. Confira as condições comerciais no site original antes de cadastrar uma cotação.
+### Quotas e falhas
 
-O pedido fixa `search_depth: basic`, `auto_parameters: false` e `include_answer: false`. Não há migração automática de provedor, compra de créditos ou alteração de plano no app. Quando a fonte limita o acesso ou a quota acaba, a consulta falha com uma mensagem e os links de pesquisa direta continuam disponíveis. A aplicação não controla o faturamento da conta: mantenha o plano gratuito sem Pay As You Go. Não foi feita consulta real autenticada à Tavily porque nenhuma chave foi fornecida; os testes usam fixtures explicitamente identificadas para verificar integração, consumo básico e erros, sem alimentar o catálogo.
+A tabela oficial consultada em 30/09/2026 informa Google Search no plano gratuito para Gemini 2.5 Flash/Flash-Lite até 500 requisições por dia, compartilhadas entre os modelos. Os demais limites de geração e da sua conta também se aplicam: o app não garante esse número de consultas disponíveis. Confira https://ai.google.dev/gemini-api/docs/pricing e os limites efetivos do seu projeto no AI Studio.
+
+Mantenha o projeto Google no plano gratuito para o uso sem cobrança. O app não habilita faturamento nem conhece o plano da chave. Se a chave pertence a um projeto com faturamento, os preços desse plano se aplicam. Cada clique faz uma única chamada `generateContent`, sem retries ou outro provedor/modelo, com timeout de 30 segundos. O Google pode executar várias consultas internas para responder. Quota esgotada retorna HTTP 429; falta de chave, erro do provedor e falta de fontes são informados sem simular sucesso. Os links de pesquisa direta permanecem disponíveis.
+
+Nenhuma chave Gemini está disponível no ambiente de desenvolvimento desta atualização. A chamada autenticada real precisa ser confirmada no seu Termux, que já contém a chave; os testes de integração usam fixtures explícitas e não alimentam o catálogo.
 
 ## Testar no Android com Termux
 
@@ -69,7 +68,7 @@ O teste `npm run test:termux` ativa a mesma configuração do Android via `TERMU
 
 ## Segurança e limites do uso pessoal
 
-As APIs Tavily e Gemini exigem token com no mínimo 24 caracteres e comparação em tempo constante. Cada função mantém limite de corpo de 8 KB, validação de campos, timeout externo e até 30 chamadas por hora/processo. O limite reinicia quando o processo reinicia e não é compartilhado entre instâncias. No modo direto, a rota de pesquisa apenas prepara links validados, com corpo limitado a 8 KB e termo de até 200 caracteres; não chama serviços externos nem usa credenciais. Para uso público/multiusuário, substitua o acesso à IA por autenticação individual e quotas compartilhadas. Quem possui o token pode consumir sua quota; não compartilhe o token pessoal.
+As rotas de pesquisa Gemini e geração de anúncios exigem token com no mínimo 24 caracteres e comparação em tempo constante. Cada função mantém limite de corpo de 8 KB, validação de campos, timeout externo e até 30 chamadas por hora/processo. O limite reinicia quando o processo reinicia e não é compartilhado entre instâncias. No modo direto, a rota de pesquisa apenas prepara links validados, com corpo limitado a 8 KB e termo de até 200 caracteres; não chama serviços externos nem usa credenciais. Para uso público/multiusuário, substitua o acesso à IA por autenticação individual e quotas compartilhadas. Quem possui o token pode consumir sua quota; não compartilhe o token pessoal.
 
 ## Dados e backup
 
@@ -87,13 +86,14 @@ npm run test:smoke
 npm audit
 ```
 
-Os testes cobrem taxas zeradas, tributos cotados, custos operacionais, ausência de equilíbrio, margem positiva estreita, URLs de pesquisa e validação de backup. O teste de produção verifica que a pesquisa prepara links sem token, inclusive quando existe um token configurado para IA, além de validar limites e proteção do gerador. A integração Tavily foi validada com respostas de teste, sem consulta autenticada real. Ela solicita resultados de busca reais quando configurada; nunca usa fixtures em produção. Chamadas reais ao Gemini dependem das suas credenciais e não foram testadas.
+Os testes cobrem taxas zeradas, tributos cotados, custos operacionais, ausência de equilíbrio, margem positiva estreita, URLs de pesquisa e validação de backup. O teste de produção verifica que a pesquisa prepara links sem token, inclusive quando existe um token configurado para IA, além de validar limites e proteção do gerador. A integração Gemini Search foi validada com fixtures para modelo fixo, ferramenta Google Search, ausência de retries e rejeição de respostas sem grounding. Nunca usa fixtures em produção. Chamadas reais ao Gemini dependem das suas credenciais e não foram testadas.
 
 ## Fontes técnicas e comerciais
 
 - Pesquisa direta: https://www.google.com/ , https://duckduckgo.com/ e https://www.mercadolivre.com.br/
-- Tavily: https://www.tavily.com/pricing e https://docs.tavily.com/documentation/api-reference/endpoint/search
 - Gemini: https://ai.google.dev/gemini-api/docs/models
+- Google Search grounding: https://ai.google.dev/gemini-api/docs/generate-content/google-search
+- Preços/quotas: https://ai.google.dev/gemini-api/docs/pricing
 - Printful: https://www.printful.com/how-printful-works/on-demand-drop-shipping
 - CJdropshipping: https://cjdropshipping.com/welcome.html
 
