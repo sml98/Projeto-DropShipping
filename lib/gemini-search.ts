@@ -1,6 +1,6 @@
 import { GoogleGenAI, ThinkingLevel, type GenerateContentParameters, type GenerateContentResponse } from '@google/genai';
 import { normalizeResults } from './research.ts';
-export const GEMINI_MODEL = 'gemini-3.5-flash-lite';
+export const GEMINI_MODEL = 'gemini-3.5-flash';
 export function geminiSearchRequest(query: string, kind: string): GenerateContentParameters {
   return {
     model: GEMINI_MODEL,

@@ -4,7 +4,7 @@ Ferramenta para pesquisar produtos e fornecedores, registrar cotações e simula
 
 ## O que é real e o que é uma hipótese
 
-- **Busca web:** utiliza exclusivamente `gemini-3.5-flash-lite` com a ferramenta Google Search, usando a mesma `GEMINI_API_KEY` do gerador. Exibe somente os títulos e URLs de `groundingMetadata.groundingChunks`, junto com a data da consulta. Exige também consultas em `webSearchQueries` para aceitar uma pesquisa. O texto gerado pelo modelo não vira catálogo, preço ou avaliação. Sem pesquisa com fontes válidas, retorna erro. Os links podem redirecionar pelo Google. Confirme preço, estoque, frete e contrato na página original.
+- **Busca web:** utiliza exclusivamente `gemini-3.5-flash` com a ferramenta Google Search, usando a mesma `GEMINI_API_KEY` do gerador. Exibe somente os títulos e URLs de `groundingMetadata.groundingChunks`, junto com a data da consulta. Exige também consultas em `webSearchQueries` para aceitar uma pesquisa. O texto gerado pelo modelo não vira catálogo, preço ou avaliação. Sem pesquisa com fontes válidas, retorna erro. Os links podem redirecionar pelo Google. Confirme preço, estoque, frete e contrato na página original.
 - **Pesquisa direta:** prepara links para Google, DuckDuckGo e Mercado Livre sem chamar APIs, exigir chave ou token. Continua disponível quando a busca automática falha.
 - **Fornecedores iniciais:** Printful e CJdropshipping, com links dos próprios sites consultados em 30/09/2026. Isso documenta a existência e a oferta anunciada, não uma auditoria de qualidade, contrato, disponibilidade no Brasil ou certificação. Não há WhatsApps, notas ou avaliações presumidas.
 - **Produtos:** catálogo inicialmente vazio. Cadastre um produto após pesquisa e cotação, informando sua URL de origem. Custo, frete, preço de venda e CPA são valores informados pelo usuário; não são métricas obtidas automaticamente de marketplaces.
@@ -27,7 +27,7 @@ APP_ACCESS_TOKEN=seu_token_pessoal_com_pelo_menos_24_caracteres
 GEMINI_API_KEY=sua_chave_gemini
 ```
 
-A chave já configurada em `GEMINI_API_KEY` é reutilizada. Não é necessário cadastrar outra API nem trocar a chave. Brave e Tavily não são chamadas. As variáveis antigas `BRAVE_SEARCH_API_KEY`, `TAVILY_API_KEY` e `GEMINI_MODEL` são ignoradas; busca e gerador chamam somente `gemini-3.5-flash-lite`. A seleção fixa impede que uma configuração antiga direcione chamadas a outro modelo.
+A chave já configurada em `GEMINI_API_KEY` é reutilizada. Não é necessário cadastrar outra API nem trocar a chave. Brave e Tavily não são chamadas. As variáveis antigas `BRAVE_SEARCH_API_KEY`, `TAVILY_API_KEY` e `GEMINI_MODEL` são ignoradas; busca e gerador chamam somente `gemini-3.5-flash`. A seleção fixa impede que uma configuração antiga direcione chamadas a outro modelo.
 
 O token protege o consumo da sua chave e fica no sessionStorage da aba. Se ainda não houver token, gere com `openssl rand -hex 32` e configure `APP_ACCESS_TOKEN` no servidor. Não publique `.env.local` nem envie a chave no chat. A chave fica somente no servidor.
 
@@ -35,7 +35,7 @@ O token protege o consumo da sua chave e fica no sessionStorage da aba. Se ainda
 npm run dev
 ```
 
-Abra http://localhost:3000. Em **Acesso às APIs opcionais**, informe apenas o token pessoal, não a chave Gemini. A opção **Buscar com Gemini 3.5 Flash-Lite + Google Search** vem ativada. Digite o produto ou fornecedor e clique em **Buscar com Gemini**. As fontes e a data aparecerão após a consulta. O widget de sugestões de pesquisa fornecido pelo Google é exibido em um iframe isolado sem execução de scripts e sem acesso ao armazenamento do app.
+Abra http://localhost:3000. Em **Acesso às APIs opcionais**, informe apenas o token pessoal, não a chave Gemini. A opção **Buscar com Gemini 3.5 Flash + Google Search** vem ativada. Digite o produto ou fornecedor e clique em **Buscar com Gemini**. As fontes e a data aparecerão após a consulta. O widget de sugestões de pesquisa fornecido pelo Google é exibido em um iframe isolado sem execução de scripts e sem acesso ao armazenamento do app.
 
 Confira os dados comerciais na página original antes de registrar uma cotação em **+ Produto** ou **+ Fornecedor**. O app não mede vendas ou demanda nem confirma que um fornecedor é confiável. Obter catálogos, estoques e cotações oficiais por APIs dos fornecedores continua pendente.
 
@@ -43,7 +43,7 @@ Para usar o app sem credenciais, desmarque a busca Gemini e escolha **Preparar p
 
 ### Quotas e falhas
 
-A tabela oficial consultada em 30/09/2026 informa Google Search para `gemini-3.5-flash-lite` no plano pago, com 5.000 requisições de busca gratuitas por mês compartilhadas entre modelos Gemini 3.x elegíveis; após a franquia, há cobrança de buscas. Os tokens de entrada e saída são cobrados no plano pago mesmo dentro da franquia de busca. Essa franquia não equivale a 5.000 chamadas completas gratuitas. Confira https://ai.google.dev/gemini-api/docs/pricing e o plano/quota do seu projeto no AI Studio.
+A tabela oficial consultada em 30/09/2026 informa Google Search para `gemini-3.5-flash` no plano pago, com 5.000 requisições de busca gratuitas por mês compartilhadas entre modelos Gemini 3.x elegíveis; após a franquia, há cobrança de buscas. Os tokens de entrada e saída são cobrados no plano pago mesmo dentro da franquia de busca. Essa franquia não equivale a 5.000 chamadas completas gratuitas. Confira https://ai.google.dev/gemini-api/docs/pricing e o plano/quota do seu projeto no AI Studio.
 
 A configuração usa um modelo atual; o 2.5 Flash está restrito a usuários anteriores e pode retornar 404 em novos projetos. O app reutiliza a chave cadastrada e não ativa faturamento, não compra créditos nem muda o plano Google. Em um projeto Free, a busca Google Search pode ser recusada; configure o plano no AI Studio somente se aceitar os custos correspondentes. A franquia é compartilhada com outros usos do projeto: o aplicativo não conhece nem impõe seu saldo global.
 
@@ -78,7 +78,7 @@ npm run diagnose:gemini
 
 O comando usa o executor TypeScript `tsx`, instalado por `npm ci`, para não depender do suporte nativo do Node a arquivos `.ts`. Se surgir `ERR_UNKNOWN_FILE_EXTENSION`, atualize o repositório e reinstale as dependências antes de repetir o comando.
 
-Esse comando carrega `.env.local` e faz uma única consulta real ao `gemini-3.5-flash-lite` com Google Search, consumindo uma chamada da sua quota. Não exige o token do navegador. Em caso de sucesso, imprime o número de fontes; em caso de falha, imprime o diagnóstico sem mostrar a chave/token. Não imprime `.env.local` nem resposta bruta do SDK. Não testa outros modelos, não contrata plano e não repete a chamada. Compartilhe somente o diagnóstico, nunca uma captura do arquivo de credenciais.
+Esse comando carrega `.env.local` e faz uma única consulta real ao `gemini-3.5-flash` com Google Search, consumindo uma chamada da sua quota. Não exige o token do navegador. Em caso de sucesso, imprime o número de fontes; em caso de falha, imprime o diagnóstico sem mostrar a chave/token. Não imprime `.env.local` nem resposta bruta do SDK. Não testa outros modelos, não contrata plano e não repete a chamada. Compartilhe somente o diagnóstico, nunca uma captura do arquivo de credenciais.
 
 ## Segurança e limites do uso pessoal
 

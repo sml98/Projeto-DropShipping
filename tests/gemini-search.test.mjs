@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { geminiSearchRequest, extractGroundedSearch, searchGemini } from '../lib/gemini-search.ts';
 const groundedFixture = { candidates: [{ groundingMetadata: { webSearchQueries: ['camiseta Brasil'], groundingChunks: [{ web: { title: 'Fixture source', uri: 'https://example.com/item' } }, { web: { title: 'unsafe', uri: 'javascript:alert(1)' } }], searchEntryPoint: { renderedContent: '<div>Fixture Google suggestions</div>' } } }] };
-test('search makes exactly one Gemini 3.5 Flash-Lite call with Google Search using the same key', async () => {
+test('search makes exactly one Gemini 3.5 Flash call with Google Search using the same key', async () => {
   let calls = 0;
   const result = await searchGemini('camiseta', 'products', 'test-key', async params => {
-    calls++; assert.equal(params.model, 'gemini-3.5-flash-lite');
+    calls++; assert.equal(params.model, 'gemini-3.5-flash');
     assert.deepEqual(params.config.tools, [{ googleSearch: {} }]);
     assert.equal(params.config.httpOptions.retryOptions.attempts, 1);
     assert.equal(params.config.responseMimeType, undefined);
