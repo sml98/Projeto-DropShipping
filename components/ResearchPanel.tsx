@@ -20,7 +20,11 @@ export function ResearchPanel() {
     e.preventDefault(); setLoading(true); setError(''); setLinks(buildResearchLinks(query, kind)); setNotice(''); setResults([]); setRetrievedAt(''); setSearchSuggestionsHtml('');
     try {
       const response = await privateFetch('/api/pesquisar', { query, kind, mode: automatic ? 'automatic' : 'direct' }); const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Consulta indisponível.');
+      if (!response.ok) {
+        const diagnosis = data.diagnostic;
+        const detail = diagnosis ? ` [${diagnosis.category}${diagnosis.providerStatus ? ` / Google HTTP ${diagnosis.providerStatus}` : ''}] ${diagnosis.detail || ''}` : '';
+        throw new Error((data.error || 'Consulta indisponível.') + detail);
+      }
       setLinks(data.links); setNotice(data.notice); setResults(data.results || []); setRetrievedAt(data.retrievedAt || ''); setSearchSuggestionsHtml(data.searchSuggestionsHtml || '');
     } catch (err) { setError(err instanceof Error ? err.message : 'Falha na consulta.'); }
     finally { setLoading(false); }

@@ -66,6 +66,16 @@ Não copie `.env.example` novamente por cima de `.env.local`: preserve suas conf
 
 O teste `npm run test:termux` ativa a mesma configuração do Android via `TERMUX_DEV=1` em Linux, inicia o servidor de desenvolvimento e exige que a página compile com HTTP 200. Isso verifica o esquema do Webpack, não emula o aparelho Android. A compilação e as verificações foram feitas em Linux; o aparelho Termux do usuário ainda precisa confirmar o funcionamento. Se aparecer outro erro, registre a mensagem completa. Instalação e execução devem ficar no diretório privado do Termux (`~/Projeto-DropShipping`), não no armazenamento compartilhado do Android.
 
+## Diagnosticar falhas Gemini no Termux
+
+Após salvar `.env.local`, reinicie o servidor. Se ainda falhar, a interface mostra a categoria, o status HTTP do Google e o detalhe da resposta com chave/token removidos. Uma mensagem genérica anterior não prova que a chave é inválida.
+
+```bash
+npm run diagnose:gemini
+```
+
+Esse comando carrega `.env.local` e faz uma única consulta real ao `gemini-2.5-flash` com Google Search, consumindo uma chamada da sua quota. Não exige o token do navegador. Em caso de sucesso, imprime o número de fontes; em caso de falha, imprime o diagnóstico sem mostrar a chave/token. Não imprime `.env.local` nem resposta bruta do SDK. Não testa outros modelos, não contrata plano e não repete a chamada. Compartilhe somente o diagnóstico, nunca uma captura do arquivo de credenciais.
+
 ## Segurança e limites do uso pessoal
 
 As rotas de pesquisa Gemini e geração de anúncios exigem token com no mínimo 24 caracteres e comparação em tempo constante. Cada função mantém limite de corpo de 8 KB, validação de campos, timeout externo e até 30 chamadas por hora/processo. O limite reinicia quando o processo reinicia e não é compartilhado entre instâncias. No modo direto, a rota de pesquisa apenas prepara links validados, com corpo limitado a 8 KB e termo de até 200 caracteres; não chama serviços externos nem usa credenciais. Para uso público/multiusuário, substitua o acesso à IA por autenticação individual e quotas compartilhadas. Quem possui o token pode consumir sua quota; não compartilhe o token pessoal.

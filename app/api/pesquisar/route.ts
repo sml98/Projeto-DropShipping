@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { field, guard, readBody } from '@/lib/server/access';
 import { buildResearchLinks } from '@/lib/research';
 import { searchGemini, GEMINI_MODEL } from '@/lib/gemini-search';
+import { diagnoseGeminiError } from '@/lib/gemini-error';
 export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
   try {
@@ -19,9 +20,8 @@ export async function POST(req: NextRequest) {
         const grounded = await searchGemini(query, kind, key);
         return NextResponse.json({ ...grounded, mode, provider: 'Gemini 2.5 Flash + Google Search', model: GEMINI_MODEL, retrievedAt: new Date().toISOString(), links: buildResearchLinks(query, kind), notice: 'Fontes retornadas pelo Google Search via Gemini 2.5 Flash. Links podem redirecionar pelo Google. Confira preço, estoque e condições na fonte. Isso não certifica fornecedores nem mede vendas.' }, { headers: { 'Cache-Control': 'no-store' } });
       } catch (err) {
-        const status = err && typeof err === 'object' && 'status' in err ? err.status : undefined;
-        const error = status === 429 ? 'Cota ou limite do Gemini atingido. Aguarde a renovação ou use os links de pesquisa direta.' : status === 401 || status === 403 ? 'O Gemini recusou o acesso. Confira a GEMINI_API_KEY e as permissões do projeto.' : err instanceof Error && err.message.startsWith('O Gemini não retornou') ? err.message : 'A busca Gemini falhou ou excedeu o tempo limite. Confira a chave e a quota; nenhum resultado foi simulado.';
-        return NextResponse.json({ error }, { status: status === 429 ? 429 : 502 });
+        const diagnosis = diagnoseGeminiError(err, [key, process.env.APP_ACCESS_TOKEN || '']);
+        return NextResponse.json({ error: `${diagnosis.message} Nenhum resultado foi simulado.`, diagnostic: { category: diagnosis.category, providerStatus: diagnosis.providerStatus, detail: diagnosis.detail } }, { status: diagnosis.httpStatus });
       }
     }
     return NextResponse.json({ links: buildResearchLinks(query, kind), mode: 'direct', notice: 'Abra uma fonte para consultar resultados reais. Este aplicativo não importa resultados, preços ou estoque automaticamente.' }, { headers: { 'Cache-Control': 'no-store' } });

@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test:smoke": "node tests/smoke.mjs",
     "dev:termux": "next dev --hostname 127.0.0.1",
-    "test:termux": "node tests/termux-dev.mjs"
+    "test:termux": "node tests/termux-dev.mjs",
+    "diagnose:gemini": "node scripts/diagnose-gemini.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
