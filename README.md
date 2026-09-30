@@ -39,6 +39,23 @@ Abra http://localhost:3000 . Em **Pesquisa → Acesso pessoal às APIs**, inform
 
 Sem credenciais configuradas, os links de pesquisa direta e os cadastros/calculadora continuam disponíveis. A busca automática e a IA indicam que estão indisponíveis; não simulam sucesso.
 
+## Testar no Android com Termux
+
+O compilador de CSS usa Tailwind 3/PostCSS em JavaScript para não depender do binário Lightning CSS ausente no ambiente Android relatado. A configuração de desenvolvimento no Android também desativa o cache persistente do Webpack e ignora apenas os diretórios ancestrais protegidos `/`, `/data` e `/data/data`. As pastas do projeto continuam sendo observadas.
+
+Para atualizar uma cópia já instalada, pare o servidor com Ctrl+C e execute dentro do projeto:
+
+```bash
+git pull --ff-only origin main
+npm ci
+npm run clean
+npm run dev:termux
+```
+
+Não copie `.env.example` novamente por cima de `.env.local`: preserve suas configurações. Abra http://127.0.0.1:3000 no navegador do mesmo celular e mantenha o Termux ativo. A primeira compilação pode ser lenta. Não é necessário root nem conceder acesso aos diretórios protegidos do Android.
+
+A compilação e as verificações foram feitas em Linux; o aparelho Termux do usuário ainda precisa confirmar o funcionamento. Se aparecer outro erro, registre a mensagem completa. Instalação e execução devem ficar no diretório privado do Termux (`~/Projeto-DropShipping`), não no armazenamento compartilhado do Android.
+
 ## Segurança e limites do uso pessoal
 
 As rotas pagas exigem token com no mínimo 24 caracteres, comparação em tempo constante, limite de corpo de 8 KB, validação de campos, timeout externo e até 30 chamadas por hora por função/processo. O limite reinicia quando o processo reinicia e não é compartilhado entre instâncias. Para uso público/multiusuário, substitua por autenticação individual, quotas compartilhadas e limites na infraestrutura. Sirva por HTTPS. Quem possui o token pode consumir sua quota; não compartilhe o token pessoal.
