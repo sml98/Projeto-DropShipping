@@ -1,0 +1,6 @@
+{
+  "name": "DropRadar BR",
+  "description": "Plataforma de inteligência de mercado, curadoria de fornecedores verificados e viabilidade financeira para Dropshipping Híbrido no Brasil.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
