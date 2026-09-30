@@ -25,13 +25,13 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   transpilePackages: ['motion'],
   webpack: (config, {dev}) => {
-    if (dev && process.platform === 'android') {
+    if (dev && (process.platform === 'android' || process.env.TERMUX_DEV === '1')) {
       // Termux cannot watch the Android filesystem ancestors. Keep source watching enabled.
       config.cache = false;
-      const ignored = config.watchOptions?.ignored;
       config.watchOptions = {
         ...config.watchOptions,
-        ignored: [...(Array.isArray(ignored) ? ignored : ignored ? [ignored] : []), /^\/$/, /^\/data$/, /^\/data\/data$/],
+        // Webpack accepts one RegExp or an array of strings, never an array of RegExps.
+        ignored: /^(?:\/|\/data|\/data\/data)$|(?:^|\/)(?:node_modules|\.git|\.next)(?:\/|$)/,
       };
     }
     // HMR is disabled in AI Studio via DISABLE_HMR env var.
