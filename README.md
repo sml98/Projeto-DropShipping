@@ -76,6 +76,8 @@ Após salvar `.env.local`, reinicie o servidor. Se ainda falhar, a interface mos
 npm run diagnose:gemini
 ```
 
+O comando usa o executor TypeScript `tsx`, instalado por `npm ci`, para não depender do suporte nativo do Node a arquivos `.ts`. Se surgir `ERR_UNKNOWN_FILE_EXTENSION`, atualize o repositório e reinstale as dependências antes de repetir o comando.
+
 Esse comando carrega `.env.local` e faz uma única consulta real ao `gemini-3.5-flash-lite` com Google Search, consumindo uma chamada da sua quota. Não exige o token do navegador. Em caso de sucesso, imprime o número de fontes; em caso de falha, imprime o diagnóstico sem mostrar a chave/token. Não imprime `.env.local` nem resposta bruta do SDK. Não testa outros modelos, não contrata plano e não repete a chamada. Compartilhe somente o diagnóstico, nunca uma captura do arquivo de credenciais.
 
 ## Segurança e limites do uso pessoal
