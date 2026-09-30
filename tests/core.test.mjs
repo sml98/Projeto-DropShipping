@@ -25,3 +25,13 @@ test('calculator rejects non-finite values and invalid percentage rates', () => 
   assert.throws(() => calculateFeasibility({ ...base, cost: Infinity }));
   assert.throws(() => calculateFeasibility({ ...base, taxPercent: 101 }));
 });
+import { buildResearchLinks } from '../lib/research.ts';
+test('free searches encode user input and target real public search pages', () => {
+  const query = 'tênis & rodinha #infantil';
+  const links = buildResearchLinks(query, 'products');
+  assert.equal(links.length, 3);
+  assert.equal(new URL(links[0].url).searchParams.get('q'), query + ' produto preço Brasil');
+  assert.equal(new URL(links[1].url).hostname, 'duckduckgo.com');
+  assert.equal(decodeURIComponent(new URL(links[2].url).pathname.slice(1)), query);
+  assert.match(new URL(buildResearchLinks('calçados', 'suppliers')[0].url).searchParams.get('q'), /fornecedor dropshipping site oficial Brasil/);
+});

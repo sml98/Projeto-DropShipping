@@ -14,3 +14,12 @@ export function normalizeResults(value: unknown): ResearchResult[] {
     return [{ url, title: row.title.replace(/<[^>]*>/g, '').slice(0, 300), description: typeof row.description === 'string' ? row.description.replace(/<[^>]*>/g, '').slice(0, 1000) : '' }];
   }).slice(0, 10);
 }
+
+export function buildResearchLinks(query: string, kind: string) {
+  const searchQuery = query + (kind === 'suppliers' ? ' fornecedor dropshipping site oficial Brasil' : ' produto preço Brasil');
+  return [
+    { title: 'Google', url: `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}` },
+    { title: 'DuckDuckGo', url: `https://duckduckgo.com/?q=${encodeURIComponent(searchQuery)}` },
+    { title: 'Mercado Livre', url: `https://lista.mercadolivre.com.br/${encodeURIComponent(query)}` },
+  ];
+}
