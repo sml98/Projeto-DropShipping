@@ -1,6 +1,6 @@
 {
-  "name": "DropRadar BR",
-  "description": "Plataforma de inteligência de mercado, curadoria de fornecedores verificados e viabilidade financeira para Dropshipping Híbrido no Brasil.",
+  "name": "DropRadar OS",
+  "description": "Central de prospecção, comparação, curadoria e operação de catálogo para dropshipping nacional e internacional, com evidências e validação humana.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

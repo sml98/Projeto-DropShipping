@@ -2,17 +2,17 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'DropRadar BR | Inteligência para Dropshipping Híbrido',
-  description: 'Ferramenta pessoal de pesquisa com fontes, diretório de fornecedores e simulação financeira de dropshipping.',
+  title: 'DropRadar OS | Commerce Intelligence',
+  description: 'Central de prospecção, comparação, curadoria, catálogo e operação para dropshipping nacional e internacional.',
   openGraph: {
-    title: 'DropRadar BR | Inteligência para Dropshipping Híbrido',
-    description: 'Curadoria de produtos em alta, fornecedores nacionais e internacionais, calculadora com Remessa Conforme e gerador de ofertas com IA.',
+    title: 'DropRadar OS | Commerce Intelligence',
+    description: 'Compare ofertas, aprove produtos e publique uma vitrine com fontes e custos rastreáveis.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DropRadar BR | Inteligência para Dropshipping Híbrido',
-    description: 'Curadoria de produtos em alta, fornecedores nacionais e internacionais e viabilidade financeira.',
+    title: 'DropRadar OS | Commerce Intelligence',
+    description: 'Prospecção, comparação, curadoria e operação de catálogo.',
   },
 };
 
@@ -25,4 +25,3 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
     </html>
   );
 }
-
