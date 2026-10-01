@@ -16,7 +16,7 @@ export function normalizeResults(value: unknown): ResearchResult[] {
 }
 
 export function buildResearchLinks(query: string, kind: string) {
-  const searchQuery = query + (kind === 'suppliers' ? ' fornecedor dropshipping site oficial Brasil' : ' produto preço Brasil');
+  const searchQuery = query + (kind === 'reputation' ? ' avaliações reputação reclamações' : kind === 'suppliers' ? ' fornecedor dropshipping site oficial Brasil' : ' produto preço Brasil');
   return [
     { title: 'Google', url: `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}` },
     { title: 'DuckDuckGo', url: `https://duckduckgo.com/?q=${encodeURIComponent(searchQuery)}` },
