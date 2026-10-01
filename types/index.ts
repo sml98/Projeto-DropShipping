@@ -20,6 +20,8 @@ export interface Product {
   trendingScore?: number;
   salesVolumeEstimate?: string;
   sourceUrl?: string;
+  costSourceUrl?: string;
+  priceSourceUrl?: string;
   sourceCheckedAt?: string;
   verificationStatus?: 'manual' | 'official-site';
   isCustom?: boolean;

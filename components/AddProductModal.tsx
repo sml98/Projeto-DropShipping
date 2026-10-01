@@ -5,29 +5,31 @@ import { Product, OriginType } from '@/types';
 import { X, Plus, Sparkles } from 'lucide-react';
 
 interface AddProductModalProps {
+  initialDraft?: Partial<Product>;
   isOpen: boolean;
   onClose: () => void;
   onAddProduct: (product: Product) => void;
 }
 
-export function AddProductModal({ isOpen, onClose, onAddProduct }: AddProductModalProps) {
-  const [name, setName] = useState('');
+export function AddProductModal({ isOpen, onClose, onAddProduct, initialDraft = {} }: AddProductModalProps) {
+  const [name, setName] = useState(initialDraft.name || '');
   const [category, setCategory] = useState('Utilidades');
   const [niche] = useState('Casa & Dia a Dia');
-  const [origin, setOrigin] = useState<OriginType>('nacional');
-  const [supplierCost, setSupplierCost] = useState('');
-  const [suggestedPrice, setSuggestedPrice] = useState('');
-  const [estimatedFreight, setEstimatedFreight] = useState('');
-  const [supplierName, setSupplierName] = useState('');
-  const [supplierLocation, setSupplierLocation] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [sourceUrl, setSourceUrl] = useState('');
-  const [description, setDescription] = useState('');
+  const [origin, setOrigin] = useState<OriginType | ''>('');
+  const [supplierCost, setSupplierCost] = useState(initialDraft.supplierCost?.toString() || '');
+  const [suggestedPrice, setSuggestedPrice] = useState(initialDraft.suggestedPrice?.toString() || '');
+  const [estimatedFreight, setEstimatedFreight] = useState(initialDraft.estimatedFreight?.toString() || '');
+  const [supplierName, setSupplierName] = useState(initialDraft.supplierName || '');
+  const [supplierLocation, setSupplierLocation] = useState(initialDraft.supplierLocation || '');
+  const [imageUrl, setImageUrl] = useState(initialDraft.imageUrl || '');
+  const [sourceUrl, setSourceUrl] = useState(initialDraft.sourceUrl || '');
+  const [description, setDescription] = useState(initialDraft.description || '');
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!origin) return;
     if (!name || !supplierCost || !suggestedPrice) return;
 
     const costNum = parseFloat(supplierCost.replace(',', '.')) || 0;
@@ -51,11 +53,13 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: AddProductMod
       suggestedPrice: priceNum,
       estimatedFreight: freightNum,
       grossMargin: parseFloat(grossMargin.toFixed(1)),
-      supplierName: supplierName.trim() || 'Fornecedor Parceiro Cadastrado',
-      supplierLocation: supplierLocation.trim() || (origin === 'nacional' ? 'Brasil' : 'China'),
+      supplierName: supplierName.trim() || 'Não informado',
+      supplierLocation: supplierLocation.trim() || 'Não informado',
       description: description.trim() || 'Produto cadastrado manualmente. Demanda não medida.',
       painPoints: [],
       sourceUrl: sourceUrl.trim(),
+      costSourceUrl: initialDraft.costSourceUrl,
+      priceSourceUrl: initialDraft.priceSourceUrl,
       sourceCheckedAt: new Date().toISOString(),
       verificationStatus: 'manual',
       isCustom: true
@@ -123,7 +127,7 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: AddProductMod
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Origem do Estoque</label>
+              <label className="block text-xs font-medium text-slate-300 mb-1">Origem do Estoque (confirme antes de salvar) *</label>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -134,7 +138,7 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: AddProductMod
                       : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
                   }`}
                 >
-                  🇧🇷 Nacional (24h)
+                  🇧🇷 Nacional
                 </button>
                 <button
                   type="button"
@@ -246,6 +250,7 @@ export function AddProductModal({ isOpen, onClose, onAddProduct }: AddProductMod
             </button>
             <button
               type="submit"
+              disabled={!origin}
               className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold rounded-xl text-sm transition-all shadow-lg shadow-emerald-500/20 cursor-pointer active:scale-95"
             >
               <Sparkles className="w-4 h-4" />

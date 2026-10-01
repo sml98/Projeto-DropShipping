@@ -37,6 +37,9 @@ export default function HomePage() {
 
   // Modals state
   const [exportProduct, setExportProduct] = useState<Product | null>(null);
+  const [productDraft, setProductDraft] = useState<Partial<Product>>({});
+  const [supplierDraft, setSupplierDraft] = useState<Partial<Supplier>>({});
+  const [draftVersion, setDraftVersion] = useState(0);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAddSupplierOpen, setIsAddSupplierOpen] = useState(false);
 
@@ -95,8 +98,8 @@ export default function HomePage() {
       <Header
         productsCount={products.length}
         suppliersCount={suppliers.length}
-        onOpenAddProduct={() => setIsAddProductOpen(true)}
-        onOpenAddSupplier={() => setIsAddSupplierOpen(true)}
+        onOpenAddProduct={() => { setProductDraft({}); setDraftVersion(v => v + 1); setIsAddProductOpen(true); }}
+        onOpenAddSupplier={() => { setSupplierDraft({}); setDraftVersion(v => v + 1); setIsAddSupplierOpen(true); }}
       />
 
       {/* Main Navigation (Tabs) */}
@@ -112,7 +115,7 @@ export default function HomePage() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
-        <ResearchPanel />
+        <ResearchPanel onPrepareProduct={draft => { setProductDraft(draft); setDraftVersion(v => v + 1); setIsAddProductOpen(true); }} onPrepareSupplier={draft => { setSupplierDraft(draft); setDraftVersion(v => v + 1); setIsAddSupplierOpen(true); }} />
 
         {/* Module 1: Radar em Alta */}
         {activeTab === 'radar' && (
@@ -121,7 +124,7 @@ export default function HomePage() {
             onSelectForCalculation={handleSelectForCalc}
             onSelectForAi={handleSelectForAi}
             onOpenExportModal={(p) => setExportProduct(p)}
-            onOpenAddProductModal={() => setIsAddProductOpen(true)}
+            onOpenAddProductModal={() => { setProductDraft({}); setDraftVersion(v => v + 1); setIsAddProductOpen(true); }}
             onViewSupplierDetails={handleViewSupplier}
           />
         )}
@@ -130,7 +133,7 @@ export default function HomePage() {
         {activeTab === 'fornecedores' && (
           <SupplierDirectory
             suppliers={suppliers}
-            onOpenAddSupplierModal={() => setIsAddSupplierOpen(true)}
+            onOpenAddSupplierModal={() => { setSupplierDraft({}); setDraftVersion(v => v + 1); setIsAddSupplierOpen(true); }}
             initialSearch={supplierSearchQuery}
           />
         )}
@@ -177,12 +180,16 @@ export default function HomePage() {
       />
 
       <AddProductModal
+        key={`product-${draftVersion}`}
+        initialDraft={productDraft}
         isOpen={isAddProductOpen}
         onClose={() => setIsAddProductOpen(false)}
         onAddProduct={handleAddProduct}
       />
 
       <AddSupplierModal
+        key={`supplier-${draftVersion}`}
+        initialDraft={supplierDraft}
         isOpen={isAddSupplierOpen}
         onClose={() => setIsAddSupplierOpen(false)}
         onAddSupplier={handleAddSupplier}

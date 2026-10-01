@@ -2,13 +2,25 @@
 
 Ferramenta para pesquisar produtos e fornecedores, registrar cotações e simular resultados por pedido. Não executa vendas, pagamentos, pedidos nem fulfillment.
 
+## Análise completa de oportunidades
+
+A opção inicial **Análise completa** faz três pesquisas basic: candidatos a fornecedor (fabricante/distribuidor/atacado/dropshipping), produtos/preços no varejo e menções de mais vendidos/vendas. Lê automaticamente até cinco URLs desses resultados usando Tavily Extract basic. Consome até quatro créditos por análise; as opções de busca simples continuam consumindo um crédito. A leitura leva até 60 segundos e falhas parciais são informadas. Vídeos e redes sociais são excluídos das buscas.
+
+A tela reúne preços em reais com o contexto original, marca parcelas/mensalidades detectadas, trechos de condições comerciais e menções de vendas. A extração é determinística, sem chamada Gemini. Isso identifica informações publicadas; não identifica automaticamente SKU, variações, estoque disponível ou unidade de venda. Páginas sem evidência ficam ocultas inicialmente e podem ser mostradas por opção. Guias/listas não recebem o botão de cadastro de fornecedor. Uma página de varejo não vira automaticamente um fornecedor aprovado.
+
+Selecione **Usar como custo** e **Usar como preço de venda** nos preços encontrados, ou informe uma cotação. Confirme que os valores são do mesmo produto, unidade/quantidade e preço total. O painel calcula lucro por pedido e margem a partir de custo, preço, frete, outros custos fixos por pedido e taxas percentuais sobre venda. Outros custos incluem anúncios/CPA, embalagem, impostos fixos e operação; valores zerados excluem esses custos. A margem é uma simulação, não lucro observado, e não é calculada automaticamente comparando produtos diferentes.
+
+**Revisar e cadastrar fornecedor** abre o cadastro com a fonte e os trechos preenchidos. **Revisar e cadastrar produto** exige a confirmação da comparação, preços válidos e ao menos uma fonte selecionada; preenche custo, preço, frete e fontes para revisão. A origem precisa ser escolhida antes de salvar. Os registros aparecem no catálogo pessoal após salvar. As URLs de custo e preço ficam preservadas no produto e no backup. Os demais custos da simulação ficam documentados na descrição; a calculadora completa exige que sejam informados novamente. **Baixar análise com fontes** exporta o relatório JSON; o relatório de pesquisa não é salvo automaticamente no catálogo.
+
+“Mais vendidos” é mostrado somente como menção literal de uma fonte, junto ao contexto. Não há ranking auditado, tendência medida, vendas por mês ou pareamento automático entre SKU de fornecedores e marketplaces. Integrações oficiais de catálogo/estoque e dados de vendas ainda são necessárias para oferecer esses indicadores de forma consistente.
+
 ## Busca automática e reputação
 
-A busca automática usa **Tavily Search**, sem chamar Gemini ou Brave. Os resultados mostram títulos, URLs, trechos das páginas e data da consulta dentro do app. Uma consulta vazia é apresentada como vazia; erros nunca geram resultados fictícios. As fontes precisam ser verificadas antes de registrar preço, estoque, frete e condições comerciais. Um resultado encontrado não prova que a empresa oferece dropshipping.
+A pesquisa usa **Tavily Search**, sem chamar Gemini ou Brave. Os resultados mostram títulos, URLs, trechos das páginas e data da consulta dentro do app. Uma consulta vazia é apresentada como vazia; erros nunca geram resultados fictícios. As fontes precisam ser verificadas antes de registrar preço, estoque, frete e condições comerciais. Um resultado encontrado não prova que a empresa oferece dropshipping.
 
 Em **Reputação de fornecedor**, informe o nome exato da empresa. A consulta busca páginas do Reclame AQUI, Trustpilot e Mercado Livre e restringe os resultados a esses domínios. A interface mostra trechos de pesquisa, não uma nota certificada. Confira a identidade da empresa, o período e se a avaliação é do fornecedor ou de um produto. Sem páginas encontradas não significa ausência de reclamações. Não há integração autenticada com as APIs dessas plataformas, nem auditoria de fornecedores.
 
-Cada clique automático faz uma única chamada Tavily com `search_depth: basic`, `auto_parameters: false`, sem resposta gerada, conteúdo bruto ou retries, com timeout de 30 segundos. Segundo a documentação consultada em 30/09/2026, basic consome 1 crédito e o plano Researcher oferece 1.000 créditos mensais sem cartão. Outros usos da conta compartilham esses créditos; consulte o saldo no painel. O app não ativa faturamento ou planos pagos. Quando há limite, informa o erro. Não consulta reputação extra automaticamente para cada resultado, evitando consumo adicional sem necessidade.
+Cada clique de busca simples faz uma única chamada Tavily com `search_depth: basic`, `auto_parameters: false`, sem resposta gerada, conteúdo bruto ou retries, com timeout de 30 segundos. Segundo a documentação consultada em 30/09/2026, basic consome 1 crédito e o plano Researcher oferece 1.000 créditos mensais sem cartão. Outros usos da conta compartilham esses créditos; consulte o saldo no painel. O app não ativa faturamento ou planos pagos. Quando há limite, informa o erro. Não consulta reputação extra automaticamente para cada resultado, evitando consumo adicional sem necessidade.
 
 A **pesquisa direta** continua preparando links para Google, DuckDuckGo e Mercado Livre sem API ou credenciais. O **gerador de anúncios** continua usando a chave Gemini existente com `gemini-3.5-flash`, sujeito às quotas da sua conta. Ele não participa da busca Tavily.
 
@@ -38,7 +50,7 @@ npm run diagnose:search
 npm run dev -- --hostname 127.0.0.1
 ```
 
-Abra http://127.0.0.1:3000. Em **Acesso às APIs opcionais**, informe somente o valor de `APP_ACCESS_TOKEN`. Deixe a busca automática marcada, escolha Produtos, Fornecedores ou Reputação de fornecedor e clique em **Buscar na web**. Para cadastrar uma cotação confirmada, use **+ Produto** ou **+ Fornecedor** e registre a URL de origem. Cadastros continuam sendo manuais; os resultados não alteram seu catálogo.
+Abra http://127.0.0.1:3000. Em **Acesso às APIs opcionais**, informe somente o valor de `APP_ACCESS_TOKEN`. Deixe a busca automática marcada e use **Análise completa → Pesquisar e analisar**. Para consultas menores, escolha Produtos, Fornecedores ou Reputação de fornecedor e clique em **Buscar na web**. Para cadastrar uma cotação confirmada, use **+ Produto** ou **+ Fornecedor** e registre a URL de origem. Cadastros continuam sendo manuais; os resultados não alteram seu catálogo.
 
 `diagnose:search` carrega `.env.local`, faz uma única busca basic real e informa quantas fontes chegaram, sem imprimir credenciais ou resposta bruta. Consome 1 crédito. Uma consulta concluída pode ter zero resultados. `diagnose:gemini` continua disponível para testar separadamente o recurso Google Search do Gemini, que exige elegibilidade/quota e não é usado pela busca do app. Execute esse diagnóstico apenas se quiser testar esse recurso Google, sujeito às condições em https://ai.google.dev/gemini-api/docs/pricing.
 

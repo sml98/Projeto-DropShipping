@@ -5,9 +5,10 @@ export class SearchError extends Error {
 }
 export function tavilyRequest(query: string, kind: string) {
   return {
-    query: query + (kind === 'reputation' ? ' avaliações reputação reclamações' : kind === 'suppliers' ? ' fornecedor dropshipping site oficial Brasil' : ' produto preço Brasil'),
+    query: query + (kind === 'reputation' ? ' avaliações reputação reclamações' : kind === 'demand' ? ' mais vendidos vendas produto Brasil' : kind === 'suppliers' ? ' fabricante distribuidor atacado dropshipping catálogo Brasil' : ' produto preço Brasil'),
     search_depth: 'basic', auto_parameters: false, topic: 'general', max_results: 10,
     include_answer: false, include_raw_content: false, include_images: false,
+    exclude_domains: ['youtube.com', 'instagram.com', 'facebook.com', 'pinterest.com', 'tiktok.com'],
     ...(kind === 'reputation' ? { include_domains: ['reclameaqui.com.br', 'trustpilot.com', 'mercadolivre.com.br'] } : {}),
   };
 }

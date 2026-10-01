@@ -5,26 +5,28 @@ import { Supplier, OriginType } from '@/types';
 import { X, UserPlus, Building2 } from 'lucide-react';
 
 interface AddSupplierModalProps {
+  initialDraft?: Partial<Supplier>;
   isOpen: boolean;
   onClose: () => void;
   onAddSupplier: (supplier: Supplier) => void;
 }
 
-export function AddSupplierModal({ isOpen, onClose, onAddSupplier }: AddSupplierModalProps) {
-  const [name, setName] = useState('');
+export function AddSupplierModal({ isOpen, onClose, onAddSupplier, initialDraft = {} }: AddSupplierModalProps) {
+  const [name, setName] = useState(initialDraft.name || '');
   const [tradeName, setTradeName] = useState('');
-  const [origin, setOrigin] = useState<OriginType>('nacional');
-  const [category, setCategory] = useState('Utilidades Gerais');
+  const [origin, setOrigin] = useState<OriginType | ''>('');
+  const [category, setCategory] = useState(initialDraft.category || 'Utilidades Gerais');
   const [location, setLocation] = useState('');
   const [dispatchTime, setDispatchTime] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
-  const [catalogUrl, setCatalogUrl] = useState('');
-  const [description, setDescription] = useState('');
+  const [catalogUrl, setCatalogUrl] = useState(initialDraft.catalogUrl || '');
+  const [description, setDescription] = useState(initialDraft.description || '');
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!origin) return;
     if (!name.trim() || !catalogUrl.trim()) return;
 
     // Remove caracteres não numéricos do telefone
@@ -108,14 +110,13 @@ export function AddSupplierModal({ isOpen, onClose, onAddSupplier }: AddSupplier
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Origem</label>
+              <label className="block text-xs font-medium text-slate-300 mb-1">Origem (confirme antes de salvar) *</label>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     setOrigin('nacional');
-                    setLocation('São Paulo - SP');
-                    setDispatchTime('24h a 48h');
+
                   }}
                   className={`flex-1 py-2 rounded-xl text-xs font-medium border transition-all ${
                     origin === 'nacional'
@@ -129,8 +130,7 @@ export function AddSupplierModal({ isOpen, onClose, onAddSupplier }: AddSupplier
                   type="button"
                   onClick={() => {
                     setOrigin('internacional');
-                    setLocation('Shenzhen - China');
-                    setDispatchTime('7 a 12 dias');
+
                   }}
                   className={`flex-1 py-2 rounded-xl text-xs font-medium border transition-all ${
                     origin === 'internacional'
@@ -173,6 +173,7 @@ export function AddSupplierModal({ isOpen, onClose, onAddSupplier }: AddSupplier
                 onChange={(e) => setDispatchTime(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-blue-500"
               >
+                <option value="">Não informado</option>
                 <option value="24h a 48h">24h a 48h (Nacional Ágil)</option>
                 <option value="No mesmo dia (até 11h)">No mesmo dia (até 11h)</option>
                 <option value="2 a 4 dias">2 a 4 dias úteis</option>
@@ -231,6 +232,7 @@ export function AddSupplierModal({ isOpen, onClose, onAddSupplier }: AddSupplier
             </button>
             <button
               type="submit"
+              disabled={!origin}
               className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-sm transition-all shadow-lg shadow-blue-500/20 cursor-pointer active:scale-95"
             >
               <Building2 className="w-4 h-4" />

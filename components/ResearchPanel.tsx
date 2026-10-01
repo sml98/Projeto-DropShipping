@@ -3,9 +3,12 @@ import { useEffect, useState } from 'react';
 import { validateBackup } from '@/lib/backup';
 import { privateFetch } from '@/lib/client-api';
 import { buildResearchLinks } from '@/lib/research';
-export function ResearchPanel() {
+import { OpportunityReport } from '@/components/OpportunityReport';
+import type { ResearchReport } from '@/lib/research-report';
+import type { Product, Supplier } from '@/types';
+export function ResearchPanel({ onPrepareProduct, onPrepareSupplier }: { onPrepareProduct: (draft: Partial<Product>) => void; onPrepareSupplier: (draft: Partial<Supplier>) => void }) {
   const [query, setQuery] = useState('');
-  const [kind, setKind] = useState('products');
+  const [kind, setKind] = useState('opportunities');
   const [token, setToken] = useState('');
   const [links, setLinks] = useState<ReturnType<typeof buildResearchLinks>>([]);
   const [error, setError] = useState('');
@@ -13,18 +16,17 @@ export function ResearchPanel() {
   const [automatic, setAutomatic] = useState(true);
   const [results, setResults] = useState<import('@/lib/research').ResearchResult[]>([]);
   const [retrievedAt, setRetrievedAt] = useState('');
+  const [report, setReport] = useState<ResearchReport | null>(null);
   const [notice, setNotice] = useState('');
   useEffect(() => { setToken(sessionStorage.getItem('dropradar_access') || ''); }, []);
   async function search(e: React.FormEvent) {
-    e.preventDefault(); setLoading(true); setError(''); setLinks(buildResearchLinks(query, kind)); setNotice(''); setResults([]); setRetrievedAt('');
+    e.preventDefault(); setReport(null); setLoading(true); setError(''); setLinks(buildResearchLinks(query, kind)); setNotice(''); setResults([]); setRetrievedAt('');
     try {
       const response = await privateFetch('/api/pesquisar', { query, kind, mode: automatic ? 'automatic' : 'direct' }); const data = await response.json();
       if (!response.ok) {
-        const diagnosis = data.diagnostic;
-        const detail = diagnosis ? ` [${diagnosis.category}${diagnosis.providerStatus ? ` / Google HTTP ${diagnosis.providerStatus}` : ''}] ${diagnosis.detail || ''}` : '';
-        throw new Error((data.error || 'Consulta indisponível.') + detail);
+        throw new Error(data.error || 'Consulta indisponível.');
       }
-      setLinks(data.links); setNotice(data.notice); setResults(data.results || []); setRetrievedAt(data.retrievedAt || '');
+      setReport(data.report || null); setLinks(data.links); setNotice(data.notice); setResults(data.results || []); setRetrievedAt(data.retrievedAt || '');
     } catch (err) { setError(err instanceof Error ? err.message : 'Falha na consulta.'); }
     finally { setLoading(false); }
   }
@@ -50,13 +52,15 @@ export function ResearchPanel() {
     <div className="flex flex-wrap justify-between gap-3"><div><h2 className="text-xl font-semibold">Pesquisa em fontes reais</h2><p className="text-sm text-slate-400 mt-1">Busca automática de produtos, fornecedores e páginas de reputação com Tavily. Confira os dados nas fontes.</p></div><button type="button" onClick={backup} className="text-sm border border-slate-700 rounded-lg px-3 py-2">Baixar backup pessoal</button></div>
     <label className="block text-xs text-slate-400">Restaurar backup (substitui os cadastros deste navegador; baixe uma cópia antes)<input type="file" accept="application/json,.json" onChange={e => void restore(e.target.files?.[0])} className="block mt-1" /></label>
     <details><summary className="cursor-pointer text-sm text-emerald-300">Acesso às APIs opcionais</summary><label className="block mt-2 text-sm">Token pessoal (se configurado no servidor)<input type="password" autoComplete="off" value={token} onChange={e => { setToken(e.target.value); sessionStorage.setItem('dropradar_access', e.target.value); }} className="block bg-slate-950 border border-slate-700 rounded-lg p-2 w-full mt-1" /></label><p className="text-xs text-slate-400 mt-1">A pesquisa direta não exige token. A busca automática e o gerador exigem o token pessoal do servidor. As chaves TAVILY_API_KEY e GEMINI_API_KEY ficam apenas em .env.local; nunca cole essas chaves aqui.</p></details>
-    <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={automatic} onChange={e => { setAutomatic(e.target.checked); setResults([]); setRetrievedAt(''); }} />Buscar automaticamente com Tavily (cota gratuita disponível)</label>
-    <form onSubmit={search} className="flex flex-wrap gap-2"><label className="sr-only" htmlFor="research-kind">Tipo de pesquisa</label><select id="research-kind" value={kind} onChange={e => { setKind(e.target.value); setLinks([]); setNotice(''); setResults([]); setRetrievedAt(''); }} className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2"><option value="products">Produtos</option><option value="suppliers">Fornecedores</option><option value="reputation">Reputação de fornecedor</option></select><label className="sr-only" htmlFor="research-query">Termo de busca</label><input id="research-query" required maxLength={200} value={query} onChange={e => { setQuery(e.target.value); setLinks([]); setNotice(''); setResults([]); setRetrievedAt(''); }} placeholder={kind === 'reputation' ? 'Nome exato da empresa ou fornecedor…' : 'Ex.: camiseta sob demanda, acessórios pet…'} className="flex-1 min-w-48 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2" /><button disabled={loading} className="bg-emerald-600 disabled:opacity-50 rounded-lg px-4 py-2">{loading ? 'Consultando…' : automatic ? 'Buscar na web' : 'Preparar pesquisa gratuita'}</button></form>
+    <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={automatic} onChange={e => { setAutomatic(e.target.checked); setReport(null); setResults([]); setRetrievedAt(''); }} />Buscar automaticamente com Tavily (cota gratuita disponível)</label>
+    <form onSubmit={search} className="flex flex-wrap gap-2"><label className="sr-only" htmlFor="research-kind">Tipo de pesquisa</label><select id="research-kind" value={kind} onChange={e => { setKind(e.target.value); setReport(null); setLinks([]); setNotice(''); setResults([]); setRetrievedAt(''); }} className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2"><option value="opportunities">Análise completa</option><option value="products">Produtos (busca simples)</option><option value="suppliers">Fornecedores</option><option value="reputation">Reputação de fornecedor</option></select><label className="sr-only" htmlFor="research-query">Termo de busca</label><input id="research-query" required maxLength={200} value={query} onChange={e => { setQuery(e.target.value); setReport(null); setLinks([]); setNotice(''); setResults([]); setRetrievedAt(''); }} placeholder={kind === 'reputation' ? 'Nome exato da empresa ou fornecedor…' : 'Ex.: camiseta sob demanda, acessórios pet…'} className="flex-1 min-w-48 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2" /><button disabled={loading} className="bg-emerald-600 disabled:opacity-50 rounded-lg px-4 py-2">{loading ? 'Consultando…' : automatic ? (kind === 'opportunities' ? 'Pesquisar e analisar' : 'Buscar na web') : 'Preparar pesquisa gratuita'}</button></form>
+    {automatic && kind === 'opportunities' && <p className="text-xs text-slate-400">Pesquisa fornecedores, varejo e indícios de vendas e lê até 5 páginas automaticamente. Consome até 4 créditos Tavily por análise. Pode levar até 60 segundos.</p>}
+    {report && <OpportunityReport key={report.retrievedAt} report={report} onPrepareProduct={onPrepareProduct} onPrepareSupplier={onPrepareSupplier} />}
     {error && <p role="alert" className="text-amber-300 text-sm">{error}</p>}
-    {retrievedAt && <p className="text-xs text-slate-400">Tavily • Consultado em {new Date(retrievedAt).toLocaleString('pt-BR')} • {results.length} resultados</p>}
+    {retrievedAt && !report && <p className="text-xs text-slate-400">Tavily • Consultado em {new Date(retrievedAt).toLocaleString('pt-BR')} • {results.length} resultados</p>}
     <div className="grid md:grid-cols-2 gap-3">{results.map(result => <article key={result.url} className="p-4 rounded-xl border border-slate-700 bg-slate-950"><a href={result.url} target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-medium">{result.title}</a><p className="text-xs text-slate-500 break-all mt-1">{result.url}</p><p className="text-sm text-slate-300 mt-2">{result.description}</p></article>)}</div>
 
-    {retrievedAt && results.length === 0 && <p className="text-sm text-slate-400">{kind === 'reputation' ? 'Sem páginas de avaliação encontradas para esta consulta. Isso não significa ausência de reclamações.' : 'Nenhuma fonte encontrada para esta consulta.'}</p>}
+    {retrievedAt && !report && results.length === 0 && <p className="text-sm text-slate-400">{kind === 'reputation' ? 'Sem páginas de avaliação encontradas para esta consulta. Isso não significa ausência de reclamações.' : 'Nenhuma fonte encontrada para esta consulta.'}</p>}
     {kind === 'reputation' && <p className="text-xs text-slate-400">Informe o nome exato do fornecedor. Os trechos abaixo não são notas verificadas; podem mencionar produtos ou empresas com nomes semelhantes.</p>}
     {notice && <p className="text-sm text-slate-400">{notice}</p>}
     <div className="flex flex-wrap gap-3">{links.map(link => <a key={link.title} href={link.url} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-emerald-700 px-4 py-3 text-emerald-300">Pesquisar no {link.title} ↗</a>)}</div>

@@ -5,7 +5,7 @@ const url = (v: unknown): boolean => typeof v === 'string' && /^https:\/\//.test
 export function isProduct(v: unknown): v is Product {
   if (!v || typeof v !== 'object') return false;
   const p = v as Record<string, unknown>;
-  return ['id', 'name', 'category', 'niche', 'originBadge', 'deliveryTime', 'imageUrl', 'supplierName', 'supplierLocation', 'description'].every(k => text(p[k])) && ['nacional', 'internacional'].includes(String(p.origin)) && ['supplierCost', 'suggestedPrice', 'estimatedFreight', 'grossMargin'].every(k => typeof p[k] === 'number' && Number.isFinite(p[k])) && ['supplierCost', 'suggestedPrice', 'estimatedFreight'].every(k => nonnegative(p[k])) && (p.imageUrl === '/product-placeholder.svg' || url(p.imageUrl)) && (p.sourceUrl == null || url(p.sourceUrl)) && (p.painPoints == null || (Array.isArray(p.painPoints) && p.painPoints.every(text)));
+  return ['id', 'name', 'category', 'niche', 'originBadge', 'deliveryTime', 'imageUrl', 'supplierName', 'supplierLocation', 'description'].every(k => text(p[k])) && ['nacional', 'internacional'].includes(String(p.origin)) && ['supplierCost', 'suggestedPrice', 'estimatedFreight', 'grossMargin'].every(k => typeof p[k] === 'number' && Number.isFinite(p[k])) && ['supplierCost', 'suggestedPrice', 'estimatedFreight'].every(k => nonnegative(p[k])) && (p.imageUrl === '/product-placeholder.svg' || url(p.imageUrl)) && (p.sourceUrl == null || url(p.sourceUrl)) && (p.costSourceUrl == null || url(p.costSourceUrl)) && (p.priceSourceUrl == null || url(p.priceSourceUrl)) && (p.painPoints == null || (Array.isArray(p.painPoints) && p.painPoints.every(text)));
 }
 export function isSupplier(v: unknown): v is Supplier {
   if (!v || typeof v !== 'object') return false;
