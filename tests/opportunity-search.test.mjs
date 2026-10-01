@@ -21,7 +21,7 @@ test('opportunity research reads only selected result URLs and preserves partial
     assert.ok(body.urls.length <= 5);
     return Response.json({ results: [{ url: source.url, raw_content: 'Dropshipping. Produto R$ 30,00. Mais vendidos.' }, { url: 'https://unrequested.example/', raw_content: 'R$ 1,00' }], failed_results: [] });
   });
-  assert.equal(calls.length, 4); assert.equal(calls.filter(call => call.url.endsWith('/search')).length, 3);
+  assert.equal(calls.length, 5); assert.equal(calls.filter(call => call.url.endsWith('/search')).length, 4);
   assert.ok(calls.every(call => call.body.search_depth === 'basic' || call.body.extract_depth === 'basic'));
   assert.equal(result.sources[0].prices[0].value, 30); assert.equal(result.sources[0].extracted, true);
   assert.equal(result.sources.some(s => s.url.includes('unrequested')), false);
@@ -39,4 +39,18 @@ test('all search failures stop after three calls, with no extract or provider fa
   let calls = 0;
   await assert.rejects(researchOpportunity('pet', 'fixture', async () => { calls++; return Response.json({}, { status: 429 }); }), err => err.status === 429);
   assert.equal(calls, 3);
+});
+test('foreign prices are converted with dated real-rate metadata and reputation remains source evidence', async () => {
+  const date = new Date().toISOString().slice(0, 10);
+  const report = await researchOpportunity('pet', 'fixture', async (url, options) => {
+    if (url.includes('frankfurter.dev')) return Response.json({ base: 'USD', quote: 'BRL', rate: 5.2, date });
+    const body = JSON.parse(options.body);
+    if (url.endsWith('/extract')) return Response.json({ results: [{ url: source.url, raw_content: 'Dropshipping USD 10.00' }] });
+    if (body.include_domains) return Response.json({ results: [{ title: 'Fixture reputation', url: 'https://www.trustpilot.com/review/example.com', content: 'Fixture public report, identity not certified' }] });
+    return Response.json({ results: [{ ...source, description: 'Dropshipping USD 10.00' }] });
+  });
+  assert.equal(report.sources[0].prices[0].brlValue, 52);
+  assert.equal(report.sources[0].prices[0].conversion.date, date);
+  assert.equal(report.reputationChecks[0].results.length, 1);
+  assert.equal(report.reputationChecks[0].verified, undefined);
 });
