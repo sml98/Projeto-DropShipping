@@ -2,6 +2,10 @@
 
 Ferramenta para pesquisar produtos e fornecedores, registrar cotações e simular resultados por pedido. Não executa vendas, pagamentos, pedidos nem fulfillment.
 
+## Organização dos resultados
+
+A análise usa abas **Fornecedores**, **Produtos** e **Vendas**, com navegação por teclado. Cada cartão resume uma fonte com preço selecionado, compra, venda simulada, lucro e status curto de vendas/reputação. Quando há vários valores, um seletor permite trocar o preço; inicialmente é mostrado o primeiro elegível encontrado, sem classificá-lo como menor preço ou melhor oferta. **Ver detalhes** abre contexto original, câmbio, cálculo completo, relatos, condições e cadastro. Os parâmetros ficam em **Ajustar custos e margem**, e observações técnicas/backup/pesquisa externa ficam recolhidos. A apresentação compacta preserva os dados e mantém o aviso de simulação visível.
+
 ## Análise completa de oportunidades
 
 A opção inicial **Análise completa** faz três pesquisas basic: candidatos a fornecedor, produtos/preços no varejo e menções de mais vendidos/vendas. Lê até cinco URLs desses resultados usando Tavily Extract basic e pesquisa reputação externa para até três domínios de candidatos a fornecedor, no Reclame AQUI, Trustpilot e Mercado Livre. Consome até **sete créditos** por análise (3 buscas + até 1 crédito de extração + até 3 buscas de reputação). As opções simples continuam consumindo um crédito. Os relatos são pesquisados pelo domínio, sem presumir identidade ou nota verificada; fontes não consultadas são identificadas. Vídeos e redes sociais são excluídos das buscas. A operação pode levar até 90 segundos e informa falhas parciais.
